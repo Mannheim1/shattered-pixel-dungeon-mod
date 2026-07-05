@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.PowerOfMany;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
@@ -106,6 +107,7 @@ public class Dungeon {
 		STRENGTH_POTIONS,
 		UPGRADE_SCROLLS,
 		ARCANE_STYLI,
+		SHEET_MUSIC,
 		ENCH_STONE,
 		INT_STONE,
 		TRINKET_CATA,
@@ -561,6 +563,18 @@ public class Dungeon {
 		int floorThisSet = (depth % 5);
 		//chance is floors left / scrolls left
 		return Random.Int(5 - floorThisSet) < asLeftThisSet;
+	}
+
+	public static boolean sheetMusicNeeded() {
+		//1 sheet of music each floor set, bard only
+		if (hero == null || hero.heroClass != HeroClass.BARD) return false;
+
+		int smLeftThisSet = 1 - (LimitedDrops.SHEET_MUSIC.count - (depth / 5));
+		if (smLeftThisSet <= 0) return false;
+
+		int floorThisSet = (depth % 5);
+		//chance is floors left / sheets left
+		return Random.Int(5 - floorThisSet) < smLeftThisSet;
 	}
 
 	public static boolean enchStoneNeeded(){

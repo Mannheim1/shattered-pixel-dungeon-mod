@@ -101,6 +101,7 @@ abstract public class ClassArmor extends Armor {
 		
 		switch (owner.heroClass) {
 			case WARRIOR:
+			case BARD: //placeholder, bard reuses warrior's class armor
 				classArmor = new WarriorArmor();
 				break;
 			case ROGUE:

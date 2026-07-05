@@ -956,8 +956,9 @@ public class Badges {
 				badge = Badge.MASTERY_CLERIC;
 				break;
 		}
-		
-		unlock(badge);
+
+		//bard currently has no mastery badge
+		if (badge != null) unlock(badge);
 	}
 
 	public static void validateRatmogrify(){

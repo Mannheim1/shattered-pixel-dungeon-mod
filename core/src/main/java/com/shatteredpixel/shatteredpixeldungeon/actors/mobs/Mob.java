@@ -31,6 +31,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dancing;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Silenced;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
@@ -475,6 +477,11 @@ public abstract class Mob extends Char {
 	}
 	
 	protected boolean canAttack( Char enemy ) {
+		//dancing characters can't make melee attacks
+		// ranged attacks are handled by subclass overrides, which this doesn't block
+		if (buff(Dancing.class) != null){
+			return false;
+		}
 		if (Dungeon.level.adjacent( pos, enemy.pos )){
 			return true;
 		}
@@ -1235,7 +1242,15 @@ public abstract class Mob extends Char {
 		@Override
 		public boolean act( boolean enemyInFOV, boolean justAlerted ) {
 			enemySeen = enemyInFOV;
-			if (enemyInFOV && !isCharmedBy( enemy ) && canAttack( enemy )) {
+
+			//don't evaluate canAttack when there's no enemy, enemyInFOV ensures enemy is non-null
+			boolean canAttack = enemyInFOV && canAttack( enemy );
+			//silenced characters cannot attack from range
+			if (canAttack && buff(Silenced.class) != null && !Dungeon.level.adjacent(pos, enemy.pos)){
+				canAttack = false;
+			}
+
+			if (enemyInFOV && !isCharmedBy( enemy ) && canAttack) {
 
 				recentlyAttackedBy.clear();
 				target = enemy.pos;

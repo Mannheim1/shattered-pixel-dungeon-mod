@@ -213,7 +213,12 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	public void idle() {
 		play(idle);
 	}
-	
+
+	//plays the movement animation in place, used by the dancing debuff
+	public void dance() {
+		play(run);
+	}
+
 	public void move( int from, int to ) {
 		turnTo( from , to );
 

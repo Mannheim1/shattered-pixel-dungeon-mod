@@ -470,6 +470,8 @@ public enum Icons {
 				return new ItemSprite(ItemSpriteSheet.RAPIER);
 			case CLERIC:
 				return new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME);
+			case BARD:
+				return new ItemSprite(ItemSpriteSheet.SOMETHING);
 			default:
 				return null;
 		}

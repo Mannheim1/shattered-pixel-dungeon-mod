@@ -91,6 +91,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap.Type;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.TestersCharm;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
@@ -1574,6 +1575,12 @@ public class Hero extends Char {
 		} else {
 			return super.glyphLevel(cls);
 		}
+	}
+
+	@Override
+	public boolean isInvulnerable(Class effect) {
+		//TEMPORARY: tester's charm grants invulnerability while carried, for bard playtesting
+		return super.isInvulnerable(effect) || belongings.getItem(TestersCharm.class) != null;
 	}
 
 	@Override

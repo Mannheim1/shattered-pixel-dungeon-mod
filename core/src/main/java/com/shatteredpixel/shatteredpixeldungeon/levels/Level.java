@@ -69,6 +69,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.WindParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.SheetMusic;
 import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
@@ -238,6 +239,10 @@ public abstract class Level implements Bundlable {
 			if (Dungeon.asNeeded()) {
 				Dungeon.LimitedDrops.ARCANE_STYLI.count++;
 				addItemToSpawn( new Stylus() );
+			}
+			if (Dungeon.sheetMusicNeeded()) {
+				Dungeon.LimitedDrops.SHEET_MUSIC.count++;
+				addItemToSpawn( new SheetMusic() );
 			}
 			if ( Dungeon.enchStoneNeeded() ){
 				Dungeon.LimitedDrops.ENCH_STONE.drop();
