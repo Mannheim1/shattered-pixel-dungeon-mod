@@ -21,12 +21,20 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.watabou.utils.PathFinder;
+import com.watabou.utils.Random;
+
+import java.util.ArrayList;
 
 //modeled on TargetedClericSpell
 public abstract class TargetedSong extends Song {
@@ -56,5 +64,29 @@ public abstract class TargetedSong extends Song {
 	}
 
 	protected abstract void onTargetSelected(Lute lute, Hero hero, Integer target);
+
+	//applies the song's effect to a character. Used for the primary target and reverb echoes
+	protected abstract void affectTarget(Lute lute, Hero hero, Char ch);
+
+	//reverb talent: chance for a targeted song to echo onto an enemy adjacent to the target
+	protected void maybeReverb(Lute lute, Hero hero, Char primary) {
+		if (hero.hasTalent(Talent.REVERB)
+				&& Random.Float() < 0.25f * hero.pointsInTalent(Talent.REVERB)) {
+
+			ArrayList<Char> candidates = new ArrayList<>();
+			for (int offset : PathFinder.NEIGHBOURS8) {
+				Char ch = Actor.findChar(primary.pos + offset);
+				if (ch != null && ch != hero && ch.alignment == Char.Alignment.ENEMY) {
+					candidates.add(ch);
+				}
+			}
+
+			if (!candidates.isEmpty()) {
+				Char echo = Random.element(candidates);
+				echo.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 3);
+				affectTarget(lute, hero, echo);
+			}
+		}
+	}
 
 }

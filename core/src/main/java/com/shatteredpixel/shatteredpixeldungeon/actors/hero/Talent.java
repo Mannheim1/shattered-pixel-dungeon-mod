@@ -58,6 +58,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HolyTome;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
@@ -197,6 +198,13 @@ public enum Talent {
 	//Power of Many T4
 	BEAMING_RAY(183, 4), LIFE_LINK(184, 4), STASIS(185, 4),
 
+	//Bard T1 (placeholder icons, reusing the warrior's until bard talent art exists)
+	DINNER_SHOW(0), PERFECT_PITCH(1), ACCENTED_STRIKE(2), CLOSING_CHORD(3),
+	//Bard T2
+	MUSICIANS_MEAL(4), LIQUID_CADENZA(5), REVERB(6), ECHOLOCATION(7), SIGHT_READING(8),
+	//Bard T3
+	TRAVELING_MUSICIAN(9, 3), ENCORE(10, 3),
+
 	//universal T4
 	HEROIC_ENERGY(26, 4), //See icon() and title() for special logic for this one
 	//Ratmogrify T4
@@ -208,6 +216,8 @@ public enum Talent {
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
 	public static class LethalMomentumTracker extends FlavourBuff{};
+	public static class DinnerShowTracker extends CounterBuff{{revivePersists = true;}};
+	public static class LiquidCadenzaTracker extends CounterBuff{{revivePersists = true;}};
 	public static class StrikingWaveTracker extends FlavourBuff{};
 	public static class WandPreservationCounter extends CounterBuff{{revivePersists = true;}};
 	public static class EmpoweredStrikeTracker extends FlavourBuff{
@@ -656,6 +666,22 @@ public enum Talent {
 				artifactChargeTurns += 1 + hero.pointsInTalent(ENLIGHTENING_MEAL);
 			}
 		}
+		if (hero.hasTalent(DINNER_SHOW)){
+			//next 1/2 songs take no time
+			DinnerShowTracker tracker = Buff.affect(hero, DinnerShowTracker.class);
+			float songs = hero.pointsInTalent(DINNER_SHOW);
+			if (tracker.count() < songs){
+				tracker.countUp(songs - tracker.count());
+			}
+		}
+		if (hero.hasTalent(MUSICIANS_MEAL)){
+			Lute lute = hero.belongings.getItem(Lute.class);
+			if (lute != null){
+				//0.5/1 lute charges
+				lute.directCharge( 0.5f * hero.pointsInTalent(MUSICIANS_MEAL) );
+				ScrollOfRecharging.charge(hero);
+			}
+		}
 
 		//we process these at the end as they can stack together from some talents
 		if (wandChargeTurns > 0){
@@ -691,21 +717,29 @@ public enum Talent {
 			factor *= 1f + hero.pointsInTalent(VETERANS_INTUITION); //instant at +2 (see onItemEquipped)
 		}
 		// 3x/instant for Mage (see Wand.wandUsed())
+		// 2x for Bard, who also detects curses on pickup at +2 (see Item.doPickUp)
 		if (item instanceof Wand){
 			factor *= 1f + 2.0f*hero.pointsInTalent(SCHOLARS_INTUITION);
+			if (hero.pointsInTalent(PERFECT_PITCH) > 0) factor *= 2f;
 		}
 		// 3x/instant speed with Huntress talent (see MissileWeapon.proc)
 		if (item instanceof MissileWeapon){
 			factor *= 1f + 2.0f*hero.pointsInTalent(SURVIVALISTS_INTUITION);
 		}
 		// 2x/instant for Rogue (see onItemEqupped), also id's type on equip/on pickup
+		// 2x for Bard as well
 		if (item instanceof Ring){
 			factor *= 1f + hero.pointsInTalent(THIEFS_INTUITION);
+			if (hero.pointsInTalent(PERFECT_PITCH) > 0) factor *= 2f;
 		}
 		return factor;
 	}
 
 	public static void onPotionUsed( Hero hero, int cell, float factor ){
+		if (hero.hasTalent(LIQUID_CADENZA)){
+			//the next song's effect lasts 25/50% longer
+			Buff.affect(hero, LiquidCadenzaTracker.class);
+		}
 		if (hero.hasTalent(LIQUID_WILLPOWER)){
 			// 6.5/10% of max HP
 			int shieldToGive = Math.round( factor * hero.HT * (0.030f + 0.035f*hero.pointsInTalent(LIQUID_WILLPOWER)));
@@ -991,6 +1025,9 @@ public enum Talent {
 			case CLERIC:
 				Collections.addAll(tierTalents, SATIATED_SPELLS, HOLY_INTUITION, SEARING_LIGHT, SHIELD_OF_LIGHT);
 				break;
+			case BARD:
+				Collections.addAll(tierTalents, DINNER_SHOW, PERFECT_PITCH, ACCENTED_STRIKE, CLOSING_CHORD);
+				break;
 		}
 		for (Talent talent : tierTalents){
 			if (replacements.containsKey(talent)){
@@ -1020,6 +1057,9 @@ public enum Talent {
 			case CLERIC:
 				Collections.addAll(tierTalents, ENLIGHTENING_MEAL, RECALL_INSCRIPTION, SUNRAY, DIVINE_SENSE, BLESS);
 				break;
+			case BARD:
+				Collections.addAll(tierTalents, MUSICIANS_MEAL, LIQUID_CADENZA, REVERB, ECHOLOCATION, SIGHT_READING);
+				break;
 		}
 		for (Talent talent : tierTalents){
 			if (replacements.containsKey(talent)){
@@ -1048,6 +1088,9 @@ public enum Talent {
 				break;
 			case CLERIC:
 				Collections.addAll(tierTalents, CLEANSE, LIGHT_READING);
+				break;
+			case BARD:
+				Collections.addAll(tierTalents, TRAVELING_MUSICIAN, ENCORE);
 				break;
 		}
 		for (Talent talent : tierTalents){

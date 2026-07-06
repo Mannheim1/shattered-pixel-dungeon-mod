@@ -70,13 +70,19 @@ public class NocturneSong extends TargetedSong {
 		Sample.INSTANCE.play(Assets.Sounds.LULLABY);
 		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 
-		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-		Buff.prolong(ch, Silenced.class, Silenced.DURATION);
+		affectTarget(lute, hero, ch);
+		maybeReverb(lute, hero, ch);
 
 		hero.spend(1f);
 		hero.next();
 
 		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected void affectTarget(Lute lute, Hero hero, Char ch) {
+		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
+		Buff.prolong(ch, Silenced.class, modifyDuration(Silenced.DURATION));
 	}
 
 }

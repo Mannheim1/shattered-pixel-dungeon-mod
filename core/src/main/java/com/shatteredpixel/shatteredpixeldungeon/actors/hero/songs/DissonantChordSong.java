@@ -76,9 +76,8 @@ public class DissonantChordSong extends TargetedSong {
 
 				Char ch = Actor.findChar(aim.collisionPos);
 				if (ch != null) {
-					ch.damage(damageRoll(lute), DissonantChordSong.this);
-					Sample.INSTANCE.play(Assets.Sounds.HIT_MAGIC, 1, Random.Float(0.87f, 1.15f));
-					ch.sprite.burst(0xFFFFFF44, 3);
+					affectTarget(lute, hero, ch);
+					maybeReverb(lute, hero, ch);
 				} else {
 					Dungeon.level.pressCell(aim.collisionPos);
 				}
@@ -90,6 +89,15 @@ public class DissonantChordSong extends TargetedSong {
 
 			}
 		});
+	}
+
+	@Override
+	protected void affectTarget(Lute lute, Hero hero, Char ch) {
+		ch.damage(damageRoll(lute), this);
+		Sample.INSTANCE.play(Assets.Sounds.HIT_MAGIC, 1, Random.Float(0.87f, 1.15f));
+		if (ch.sprite != null) {
+			ch.sprite.burst(0xFFFFFF44, 3);
+		}
 	}
 
 	public int damageRoll(Lute lute) {

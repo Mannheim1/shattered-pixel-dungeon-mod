@@ -75,6 +75,17 @@ public class DirgeSong extends TargetedSong {
 		Sample.INSTANCE.play(Assets.Sounds.CURSED);
 		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 
+		affectTarget(lute, hero, ch);
+		maybeReverb(lute, hero, ch);
+
+		hero.spend(1f);
+		hero.next();
+
+		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected void affectTarget(Lute lute, Hero hero, Char ch) {
 		//the dirge lasts longer against entranced targets, consuming the trance
 		float duration = BASE_DURATION;
 		Trance trance = ch.buff(Trance.class);
@@ -82,15 +93,11 @@ public class DirgeSong extends TargetedSong {
 			duration = TRANCED_DURATION;
 			trance.detach();
 		}
+		duration = modifyDuration(duration);
 
 		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 		Buff.prolong(ch, Terror.class, duration).object = hero.id();
 		Buff.prolong(ch, BardTerrorTracker.class, duration);
-
-		hero.spend(1f);
-		hero.next();
-
-		onSongCast(lute, hero);
 	}
 
 	//invisible tracker so effects like grand finale can tell bard-sourced terror apart

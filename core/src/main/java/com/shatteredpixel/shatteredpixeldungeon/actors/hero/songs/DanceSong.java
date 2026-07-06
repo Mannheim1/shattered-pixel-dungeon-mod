@@ -70,13 +70,19 @@ public class DanceSong extends TargetedSong {
 		Sample.INSTANCE.play(Assets.Sounds.CHARMS);
 		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 
-		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-		Buff.prolong(ch, Dancing.class, Dancing.DURATION);
+		affectTarget(lute, hero, ch);
+		maybeReverb(lute, hero, ch);
 
 		hero.spend(1f);
 		hero.next();
 
 		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected void affectTarget(Lute lute, Hero hero, Char ch) {
+		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
+		Buff.prolong(ch, Dancing.class, modifyDuration(Dancing.DURATION));
 	}
 
 }

@@ -50,13 +50,15 @@ public class MarchSong extends Song {
 		Sample.INSTANCE.play(Assets.Sounds.MASTERY);
 		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 
-		Buff.prolong(hero, Marching.class, Marching.DURATION);
+		float duration = modifyDuration(Marching.DURATION);
+
+		Buff.prolong(hero, Marching.class, duration);
 
 		for (Char ch : Actor.chars()) {
 			if (ch != hero
 					&& ch.alignment == Char.Alignment.ALLY
 					&& Dungeon.level.heroFOV[ch.pos]) {
-				Buff.prolong(ch, Marching.class, Marching.DURATION);
+				Buff.prolong(ch, Marching.class, duration);
 				ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 3);
 			}
 		}

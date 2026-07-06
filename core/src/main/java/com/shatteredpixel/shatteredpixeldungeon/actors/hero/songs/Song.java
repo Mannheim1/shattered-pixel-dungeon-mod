@@ -22,12 +22,17 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
@@ -68,6 +73,49 @@ public abstract class Song {
 		Invisibility.dispel();
 		lute.spendCharge(chargeUse(hero));
 		Talent.onArtifactUsed(hero);
+
+		//dinner show: the song takes no time. All songs spend 1 turn before this, so refund it
+		Talent.DinnerShowTracker dinnerShow = hero.buff(Talent.DinnerShowTracker.class);
+		if (dinnerShow != null){
+			hero.spend(-1f);
+			dinnerShow.countDown(1);
+			if (dinnerShow.count() <= 0){
+				dinnerShow.detach();
+			}
+		}
+
+		//liquid cadenza is consumed by playing a song
+		Talent.LiquidCadenzaTracker cadenza = hero.buff(Talent.LiquidCadenzaTracker.class);
+		if (cadenza != null){
+			cadenza.detach();
+		}
+
+		//echolocation: performing reveals nearby enemies through walls
+		if (hero.hasTalent(Talent.ECHOLOCATION)){
+			int range = 2 + 2*hero.pointsInTalent(Talent.ECHOLOCATION);
+			int duration = 1 + 2*hero.pointsInTalent(Talent.ECHOLOCATION);
+			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])){
+				if (Dungeon.level.distance(hero.pos, mob.pos) <= range){
+					Buff.append(hero, TalismanOfForesight.CharAwareness.class, duration).charID = mob.id();
+				}
+			}
+		}
+
+		//encore: chance to refund the song's charge cost
+		if (hero.hasTalent(Talent.ENCORE)
+				&& Random.Float() < 0.10f*hero.pointsInTalent(Talent.ENCORE)){
+			lute.directCharge(chargeUse(hero));
+			GLog.p(Messages.get(Song.class, "encore"));
+		}
+	}
+
+	//applies talent effects (e.g. liquid cadenza) to the duration of a song's effect
+	public static float modifyDuration(float baseDuration){
+		Hero hero = Dungeon.hero;
+		if (hero != null && hero.buff(Talent.LiquidCadenzaTracker.class) != null){
+			baseDuration *= 1f + 0.25f*hero.pointsInTalent(Talent.LIQUID_CADENZA);
+		}
+		return baseDuration;
 	}
 
 	public static ArrayList<Song> getAllSongs(){

@@ -70,13 +70,20 @@ public class MarionetteWaltzSong extends TargetedSong {
 		Sample.INSTANCE.play(Assets.Sounds.CHARMS);
 		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 
-		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-		Buff.affect(ch, Marionette.class).reset();
+		affectTarget(lute, hero, ch);
+		maybeReverb(lute, hero, ch);
 
 		hero.spend(1f);
 		hero.next();
 
 		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected void affectTarget(Lute lute, Hero hero, Char ch) {
+		//note that the marionette's duration is internal, so liquid cadenza doesn't affect it
+		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
+		Buff.affect(ch, Marionette.class).reset();
 	}
 
 }

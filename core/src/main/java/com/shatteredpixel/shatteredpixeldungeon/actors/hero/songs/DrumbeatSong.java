@@ -47,7 +47,7 @@ public class DrumbeatSong extends Song {
 		Sample.INSTANCE.play(Assets.Sounds.HIT_CRUSH, 1f, 0.8f);
 		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 
-		Buff.prolong(hero, Drumbeat.class, Drumbeat.DURATION).addBeat();
+		Buff.prolong(hero, Drumbeat.class, modifyDuration(Drumbeat.DURATION)).addBeat();
 
 		hero.spend(1f);
 		hero.next();

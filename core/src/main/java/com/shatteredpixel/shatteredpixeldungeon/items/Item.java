@@ -42,6 +42,7 @@ import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -124,12 +125,19 @@ public class Item implements Bundlable {
 
 	public boolean doPickUp(Hero hero, int pos) {
 		if (collect( hero.belongings.backpack )) {
-			
+
+			//perfect pitch: the bard hears the sour note of a cursed item
+			if (hero.pointsInTalent(Talent.PERFECT_PITCH) == 2
+					&& cursed && !cursedKnown){
+				cursedKnown = true;
+				GLog.w( Messages.get(Talent.class, "perfect_pitch_curse", name()) );
+			}
+
 			GameScene.pickUp( this, pos );
 			Sample.INSTANCE.play( Assets.Sounds.ITEM );
 			hero.spendAndNext( pickupDelay() );
 			return true;
-			
+
 		} else {
 			return false;
 		}

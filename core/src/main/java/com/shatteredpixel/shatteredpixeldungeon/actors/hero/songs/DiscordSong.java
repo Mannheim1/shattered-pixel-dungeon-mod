@@ -76,6 +76,17 @@ public class DiscordSong extends TargetedSong {
 		Sample.INSTANCE.play(Assets.Sounds.CHALLENGE);
 		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 
+		affectTarget(lute, hero, ch);
+		maybeReverb(lute, hero, ch);
+
+		hero.spend(1f);
+		hero.next();
+
+		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected void affectTarget(Lute lute, Hero hero, Char ch) {
 		//discord lasts longer against entranced targets, consuming the trance
 		float duration = BASE_DURATION;
 		Trance trance = ch.buff(Trance.class);
@@ -83,6 +94,7 @@ public class DiscordSong extends TargetedSong {
 			duration = TRANCED_DURATION;
 			trance.detach();
 		}
+		duration = modifyDuration(duration);
 
 		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
 		Buff.prolong(ch, Amok.class, duration);
@@ -92,11 +104,6 @@ public class DiscordSong extends TargetedSong {
 		if (ch instanceof Mob && ((Mob) ch).state == ((Mob) ch).SLEEPING) {
 			((Mob) ch).state = ((Mob) ch).WANDERING;
 		}
-
-		hero.spend(1f);
-		hero.next();
-
-		onSongCast(lute, hero);
 	}
 
 	//invisible tracker so effects like grand finale can tell bard-sourced amok apart

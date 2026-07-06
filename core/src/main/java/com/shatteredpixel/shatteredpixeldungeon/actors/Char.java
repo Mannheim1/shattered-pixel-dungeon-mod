@@ -46,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dancing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.GrandFinaleSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drumbeat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LaidToRest;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Marching;
@@ -425,6 +426,13 @@ public abstract class Char extends Actor {
 
 			//flat damage bonus is affected by multipliers
 			dmg += dmgBonus;
+
+			//accented strike: the bard's attacks land harder on song-affected enemies
+			if (this == Dungeon.hero
+					&& Dungeon.hero.hasTalent(Talent.ACCENTED_STRIKE)
+					&& GrandFinaleSong.bardicDebuffs(enemy) > 0){
+				dmg += 1 + Dungeon.hero.pointsInTalent(Talent.ACCENTED_STRIKE);
+			}
 
 			if (enemy.buff(GuidingLight.Illuminated.class) != null){
 				enemy.buff(GuidingLight.Illuminated.class).detach();

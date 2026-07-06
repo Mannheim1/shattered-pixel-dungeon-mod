@@ -21,18 +21,25 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DanceSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DissonantChordSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.Song;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.TranceSong;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBardSongs;
 import com.watabou.utils.Bundle;
@@ -63,7 +70,7 @@ public class Lute extends Artifact {
 	@Override
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
-		if (isEquipped( hero )
+		if ((isEquipped( hero ) || hero.hasTalent(Talent.TRAVELING_MUSICIAN))
 				&& !cursed
 				&& hero.buff(MagicImmune.class) == null) {
 			actions.add(AC_PLAY);
@@ -80,7 +87,7 @@ public class Lute extends Artifact {
 
 		if (action.equals(AC_PLAY)) {
 
-			if (!isEquipped(hero)) GLog.i(Messages.get(Artifact.class, "need_to_equip"));
+			if (!isEquipped(hero) && !hero.hasTalent(Talent.TRAVELING_MUSICIAN)) GLog.i(Messages.get(Artifact.class, "need_to_equip"));
 			else if (cursed)       GLog.i( Messages.get(this, "cursed") );
 			else {
 
@@ -88,6 +95,40 @@ public class Lute extends Artifact {
 
 			}
 
+		}
+	}
+
+	@Override
+	public boolean doUnequip(Hero hero, boolean collect, boolean single) {
+		if (super.doUnequip(hero, collect, single)){
+			if (collect && hero.hasTalent(Talent.TRAVELING_MUSICIAN)){
+				activate(hero);
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean collect( Bag container ) {
+		if (super.collect(container)){
+			if (container.owner instanceof Hero
+					&& passiveBuff == null
+					&& ((Hero) container.owner).hasTalent(Talent.TRAVELING_MUSICIAN)){
+				activate((Hero) container.owner);
+			}
+			return true;
+		} else{
+			return false;
+		}
+	}
+
+	@Override
+	protected void onDetach() {
+		if (passiveBuff != null){
+			passiveBuff.detach();
+			passiveBuff = null;
 		}
 	}
 
@@ -130,7 +171,7 @@ public class Lute extends Artifact {
 	}
 
 	public boolean canPlay( Hero hero, Song song ){
-		return isEquipped(hero)
+		return (isEquipped(hero) || (hero.hasTalent(Talent.TRAVELING_MUSICIAN) && hero.belongings.contains(this)))
 				&& hero.buff(MagicImmune.class) == null
 				&& charge >= song.chargeUse(hero)
 				&& song.canCast(hero);
@@ -143,7 +184,29 @@ public class Lute extends Artifact {
 			partialCharge++;
 		}
 
+		//closing chord: spending the lute's last charge grants shielding
+		if (charge <= 0 && Dungeon.hero != null && Dungeon.hero.hasTalent(Talent.CLOSING_CHORD)){
+			int shield = 1 + 2*Dungeon.hero.pointsInTalent(Talent.CLOSING_CHORD);
+			Buff.affect(Dungeon.hero, Barrier.class).setShield(shield);
+			Dungeon.hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(shield), FloatingText.SHIELDING);
+		}
+
 		updateQuickslot();
+	}
+
+	public void directCharge(float amount){
+		if (charge < chargeCap) {
+			partialCharge += amount;
+			while (partialCharge >= 1f) {
+				charge++;
+				partialCharge--;
+			}
+			if (charge >= chargeCap){
+				partialCharge = 0;
+				charge = chargeCap;
+			}
+			updateQuickslot();
+		}
 	}
 
 	//instantly fills the lute's charge, used by the tester's charm
@@ -182,6 +245,7 @@ public class Lute extends Artifact {
 		if (cursed || target.buff(MagicImmune.class) != null) return;
 
 		if (charge < chargeCap) {
+			if (!isEquipped(target)) amount *= 0.25f*target.pointsInTalent(Talent.TRAVELING_MUSICIAN);
 			partialCharge += 0.25f*amount;
 			while (partialCharge >= 1f) {
 				charge++;
@@ -203,7 +267,12 @@ public class Lute extends Artifact {
 				if (Regeneration.regenOn()) {
 					float turnsToCharge = 45 - (chargeCap - charge);
 					turnsToCharge /= RingOfEnergy.artifactChargeMultiplier(target);
-					partialCharge += (1f / turnsToCharge);
+					float chargeToGain = (1f / turnsToCharge);
+					//25/50/75% recharge speed when unequipped, from traveling musician
+					if (!isEquipped(Dungeon.hero)){
+						chargeToGain *= 0.25f*Dungeon.hero.pointsInTalent(Talent.TRAVELING_MUSICIAN);
+					}
+					partialCharge += chargeToGain;
 				}
 
 				while (partialCharge >= 1) {

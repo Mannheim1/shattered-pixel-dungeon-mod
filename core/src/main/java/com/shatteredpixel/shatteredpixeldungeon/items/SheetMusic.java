@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.Song;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -83,21 +84,30 @@ public class SheetMusic extends Item {
 
 			Random.shuffle(unknown);
 
-			if (unknown.size() == 1) {
+			//sight reading grants a third song to choose from
+			int numChoices = 2 + (hero.hasTalent(Talent.SIGHT_READING) ? 1 : 0);
+			numChoices = Math.min(numChoices, unknown.size());
+
+			if (numChoices == 1) {
 				learn(hero, lute, unknown.get(0));
 			} else {
-				Song first = unknown.get(0);
-				Song second = unknown.get(1);
+				ArrayList<Song> choices = new ArrayList<>(unknown.subList(0, numChoices));
+
+				StringBuilder message = new StringBuilder(Messages.get(SheetMusic.this, "choose_desc"));
+				String[] options = new String[choices.size()];
+				for (int i = 0; i < choices.size(); i++) {
+					Song song = choices.get(i);
+					message.append("\n\n_").append(Messages.titleCase(song.name())).append(":_ ").append(song.shortDesc());
+					options[i] = Messages.titleCase(song.name());
+				}
+
 				GameScene.show(new WndOptions(new ItemSprite(this),
 						Messages.titleCase(name()),
-						Messages.get(SheetMusic.this, "choose_desc",
-								Messages.titleCase(first.name()), first.shortDesc(),
-								Messages.titleCase(second.name()), second.shortDesc()),
-						Messages.titleCase(first.name()),
-						Messages.titleCase(second.name())) {
+						message.toString(),
+						options) {
 					@Override
 					protected void onSelect(int index) {
-						learn(hero, lute, index == 0 ? first : second);
+						learn(hero, lute, choices.get(index));
 					}
 				});
 			}
@@ -111,6 +121,12 @@ public class SheetMusic extends Item {
 
 		GLog.p(Messages.get(this, "learned", Messages.titleCase(song.name())));
 		Sample.INSTANCE.play(Assets.Sounds.READ);
+
+		//sight reading +2: studying sheet music also fully recharges the lute
+		if (hero.pointsInTalent(Talent.SIGHT_READING) == 2) {
+			lute.fullCharge();
+		}
+
 		hero.sprite.operate(hero.pos);
 		hero.spendAndNext(1f);
 		updateQuickslot();
