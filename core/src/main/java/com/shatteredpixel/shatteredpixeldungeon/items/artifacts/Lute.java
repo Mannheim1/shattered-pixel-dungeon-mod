@@ -25,15 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DanceSong;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DirgeSong;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DiscordSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DissonantChordSong;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DrumbeatSong;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.GrandFinaleSong;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.MarchSong;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.MarionetteWaltzSong;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.NocturneSong;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.RequiemSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.Song;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.TranceSong;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
@@ -111,20 +103,11 @@ public class Lute extends Artifact {
 		}
 	}
 
-	//the songs the bard has learned. starts with all implemented songs for testing,
-	// except the placeholders, which are learned via sheet music
+	//the songs the bard has learned. All others are learned via sheet music
 	private ArrayList<Class<? extends Song>> knownSongs = new ArrayList<>(Arrays.asList(
 			TranceSong.class,
 			DanceSong.class,
-			DissonantChordSong.class,
-			DirgeSong.class,
-			DiscordSong.class,
-			MarchSong.class,
-			DrumbeatSong.class,
-			NocturneSong.class,
-			MarionetteWaltzSong.class,
-			RequiemSong.class,
-			GrandFinaleSong.class));
+			DissonantChordSong.class));
 
 	public ArrayList<Song> knownSongs(){
 		ArrayList<Song> songs = new ArrayList<>();
@@ -160,6 +143,13 @@ public class Lute extends Artifact {
 			partialCharge++;
 		}
 
+		updateQuickslot();
+	}
+
+	//instantly fills the lute's charge, used by the tester's charm
+	public void fullCharge() {
+		charge = chargeCap;
+		partialCharge = 0;
 		updateQuickslot();
 	}
 

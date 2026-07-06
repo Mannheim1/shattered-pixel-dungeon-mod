@@ -21,16 +21,66 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.Song;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 
-//TEMPORARY dev item: makes the hero invulnerable while it is in their inventory.
-// used for playtesting the bard class, remove before any release
+import java.util.ArrayList;
+
+//TEMPORARY dev item: makes the hero invulnerable while it is in their inventory,
+// and provides cheats for playtesting the bard. Remove before any release
 public class TestersCharm extends Item {
+
+	public static final String AC_SONGS     = "SONGS";
+	public static final String AC_RECHARGE  = "RECHARGE";
 
 	{
 		image = ItemSpriteSheet.SOMETHING;
 
 		unique = true;
+	}
+
+	@Override
+	public ArrayList<String> actions(Hero hero) {
+		ArrayList<String> actions = super.actions(hero);
+		actions.add(AC_SONGS);
+		actions.add(AC_RECHARGE);
+		return actions;
+	}
+
+	@Override
+	public void execute(Hero hero, String action) {
+
+		super.execute(hero, action);
+
+		if (action.equals(AC_SONGS)) {
+
+			Lute lute = hero.belongings.getItem(Lute.class);
+			if (lute == null) {
+				GLog.w(Messages.get(this, "no_lute"));
+			} else {
+				for (Song song : Song.getAllSongs()) {
+					lute.learnSong(song);
+				}
+				GLog.p(Messages.get(this, "songs_unlocked"));
+			}
+
+		} else if (action.equals(AC_RECHARGE)) {
+
+			Lute lute = hero.belongings.getItem(Lute.class);
+			if (lute != null) {
+				lute.fullCharge();
+			}
+			//covers any other artifacts the hero is testing with
+			Buff.affect(hero, ArtifactRecharge.class).set(50);
+			GLog.p(Messages.get(this, "recharged"));
+
+		}
 	}
 
 	@Override

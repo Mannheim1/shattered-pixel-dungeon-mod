@@ -83,8 +83,8 @@ public abstract class Song {
 		songs.add(MarionetteWaltzSong.INSTANCE);
 		songs.add(RequiemSong.INSTANCE);
 		songs.add(GrandFinaleSong.INSTANCE);
-		songs.add(PlaceholderSongA.INSTANCE);
-		songs.add(PlaceholderSongB.INSTANCE);
+		songs.add(WinterWindSong.INSTANCE);
+		songs.add(StokeFlameSong.INSTANCE);
 		return songs;
 	}
 
