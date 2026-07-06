@@ -43,7 +43,7 @@ public class SheetMusic extends Item {
 	public static final String AC_STUDY = "STUDY";
 
 	{
-		image = ItemSpriteSheet.SOMETHING; //placeholder, no sheet music sprite yet
+		image = ItemSpriteSheet.SHEET_MUSIC;
 
 		defaultAction = AC_STUDY;
 

@@ -49,8 +49,7 @@ public class DiscordSong extends TargetedSong {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.RADIANCE;
+		return HeroIcon.DISCORD;
 	}
 
 	@Override

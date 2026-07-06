@@ -39,8 +39,7 @@ public class MarchSong extends Song {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.DIVINE_SENSE;
+		return HeroIcon.MARCH;
 	}
 
 	@Override

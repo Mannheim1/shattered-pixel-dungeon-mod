@@ -50,8 +50,7 @@ public class StokeFlameSong extends Song {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.ELEMENTAL_BLAST;
+		return HeroIcon.STOKE_FLAME;
 	}
 
 	@Override

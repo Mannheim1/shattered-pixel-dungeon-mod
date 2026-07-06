@@ -43,8 +43,7 @@ public class TranceSong extends TargetedSong {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.SUNRAY;
+		return HeroIcon.TRANCE_SONG;
 	}
 
 	@Override

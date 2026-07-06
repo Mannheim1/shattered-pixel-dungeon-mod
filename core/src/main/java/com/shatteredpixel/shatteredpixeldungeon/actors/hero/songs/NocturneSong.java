@@ -43,8 +43,7 @@ public class NocturneSong extends TargetedSong {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.HOLY_LANCE;
+		return HeroIcon.NOCTURNE;
 	}
 
 	@Override

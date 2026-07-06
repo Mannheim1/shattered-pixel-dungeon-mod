@@ -30,7 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class Shillelagh extends MeleeWeapon {
 
 	{
-		image = ItemSpriteSheet.CUDGEL; //placeholder, no shillelagh sprite yet
+		image = ItemSpriteSheet.SHILLELAGH;
 		hitSound = Assets.Sounds.HIT_CRUSH;
 		hitSoundPitch = 1.1f;
 

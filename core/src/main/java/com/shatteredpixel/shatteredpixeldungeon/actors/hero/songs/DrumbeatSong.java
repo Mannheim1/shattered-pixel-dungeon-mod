@@ -36,8 +36,7 @@ public class DrumbeatSong extends Song {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.SMITE;
+		return HeroIcon.DRUMBEAT;
 	}
 
 	@Override

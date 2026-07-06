@@ -44,8 +44,7 @@ public class DissonantChordSong extends TargetedSong {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.GUIDING_LIGHT;
+		return HeroIcon.DISSONANT_CHORD;
 	}
 
 	@Override

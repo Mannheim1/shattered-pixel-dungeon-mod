@@ -46,6 +46,28 @@ public class ItemSpriteSheet {
 		film.add( item, x, y, x+width, y+height);
 	}
 
+	//items at or above this value are on the mod items sheet, at (item - MOD_OFFSET).
+	// See ItemSprite.frame. This avoids binary conflicts with upstream's items.png
+	public static final int MOD_OFFSET = 1000;
+
+	public static TextureFilm modFilm = new TextureFilm( TX_WIDTH, TX_HEIGHT, SIZE, SIZE );
+
+	private static void assignModItemRect( int item, int width, int height ){
+		int x = ((item-MOD_OFFSET) % WIDTH) * SIZE;
+		int y = ((item-MOD_OFFSET) / WIDTH) * SIZE;
+		modFilm.add( item, x, y, x+width, y+height);
+	}
+
+	//bard items, on the bottom row of the mod items sheet
+	public static final int LUTE        = MOD_OFFSET+508;
+	public static final int SHEET_MUSIC = MOD_OFFSET+509;
+	public static final int SHILLELAGH  = MOD_OFFSET+510;
+	static {
+		assignModItemRect(LUTE,        16, 16);
+		assignModItemRect(SHEET_MUSIC, 16, 16);
+		assignModItemRect(SHILLELAGH,  16, 16);
+	}
+
 	private static final int PLACEHOLDERS   =                               xy(1, 1);   //18 slots
 	//SOMETHING is the default item sprite at position 0. May show up ingame if there are bugs.
 	public static final int SOMETHING       = PLACEHOLDERS+0;

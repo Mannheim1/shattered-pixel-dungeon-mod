@@ -37,7 +37,7 @@ public class Silenced extends FlavourBuff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.WEAKNESS; //placeholder, no silenced icon yet
+		return BuffIndicator.SILENCED;
 	}
 
 	@Override

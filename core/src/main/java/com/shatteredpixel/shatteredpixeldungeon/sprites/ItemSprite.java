@@ -247,9 +247,18 @@ public class ItemSprite extends MovieClip {
 	}
 
 	public void frame( int image ){
-		frame( ItemSpriteSheet.film.get( image ));
+		float height;
+		if (image >= ItemSpriteSheet.MOD_OFFSET){
+			//mod items live on the mod items sheet
+			texture( Assets.Sprites.MOD_ITEMS );
+			frame( ItemSpriteSheet.modFilm.get( image ));
+			height = ItemSpriteSheet.modFilm.height( image );
+		} else {
+			texture( Assets.Sprites.ITEMS );
+			frame( ItemSpriteSheet.film.get( image ));
+			height = ItemSpriteSheet.film.height( image );
+		}
 
-		float height = ItemSpriteSheet.film.height( image );
 		//adds extra raise to very short items, so they are visible
 		if (height < 8f){
 			perspectiveRaise =  (5 + 8 - height) / 16f;

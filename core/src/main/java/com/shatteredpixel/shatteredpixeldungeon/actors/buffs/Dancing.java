@@ -65,7 +65,7 @@ public class Dancing extends FlavourBuff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.AMOK; //placeholder, no dancing icon yet
+		return BuffIndicator.DANCING;
 	}
 
 	@Override

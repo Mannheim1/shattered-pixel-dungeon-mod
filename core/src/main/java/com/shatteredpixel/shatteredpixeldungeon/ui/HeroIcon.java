@@ -33,7 +33,11 @@ import com.watabou.noosa.TextureFilm;
 public class HeroIcon extends Image {
 
 	private static TextureFilm film;
+	private static TextureFilm modFilm;
 	private static final int SIZE = 16;
+
+	//icons at or above this value are on the mod icon sheet, at (icon - MOD_OFFSET)
+	public static final int MOD_OFFSET = 1000;
 
 	//transparent icon
 	public static final int NONE    = 127;
@@ -114,44 +118,57 @@ public class HeroIcon extends Image {
 	public static final int WEAPON_SWAP     = 109;
 	public static final int MONK_ABILITIES  = 110;
 
+	//bard songs, on the mod hero icons sheet
+	public static final int TRANCE_SONG      = MOD_OFFSET+112;
+	public static final int DANCE_SONG       = MOD_OFFSET+113;
+	public static final int DISSONANT_CHORD  = MOD_OFFSET+114;
+	public static final int DIRGE            = MOD_OFFSET+115;
+	public static final int DISCORD          = MOD_OFFSET+116;
+	public static final int MARCH            = MOD_OFFSET+117;
+	public static final int DRUMBEAT         = MOD_OFFSET+118;
+	public static final int NOCTURNE         = MOD_OFFSET+119;
+	public static final int MARIONETTE_WALTZ = MOD_OFFSET+120;
+	public static final int REQUIEM          = MOD_OFFSET+121;
+	public static final int GRAND_FINALE     = MOD_OFFSET+122;
+	public static final int WINTER_WIND      = MOD_OFFSET+123;
+	public static final int STOKE_FLAME      = MOD_OFFSET+124;
+
+	//bard subclasses, also on the mod hero icons sheet
+	public static final int SKALD            = MOD_OFFSET+125;
+
 	public HeroIcon(HeroSubClass subCls){
-		super( Assets.Interfaces.HERO_ICONS );
-		if (film == null){
-			film = new TextureFilm(texture, SIZE, SIZE);
-		}
-		frame(film.get(subCls.icon()));
+		this(subCls.icon());
 	}
 
 	public HeroIcon(ArmorAbility abil){
-		super( Assets.Interfaces.HERO_ICONS );
-		if (film == null){
-			film = new TextureFilm(texture, SIZE, SIZE);
-		}
-		frame(film.get(abil.icon()));
+		this(abil.icon());
 	}
 
 	public HeroIcon(ActionIndicator.Action action){
-		super( Assets.Interfaces.HERO_ICONS );
-		if (film == null){
-			film = new TextureFilm(texture, SIZE, SIZE);
-		}
-		frame(film.get(action.actionIcon()));
+		this(action.actionIcon());
 	}
 
 	public HeroIcon(ClericSpell spell){
-		super( Assets.Interfaces.HERO_ICONS );
-		if (film == null){
-			film = new TextureFilm(texture, SIZE, SIZE);
-		}
-		frame(film.get(spell.icon()));
+		this(spell.icon());
 	}
 
 	public HeroIcon(Song song){
-		super( Assets.Interfaces.HERO_ICONS );
-		if (film == null){
-			film = new TextureFilm(texture, SIZE, SIZE);
+		this(song.icon());
+	}
+
+	public HeroIcon(int icon){
+		super( icon >= MOD_OFFSET ? Assets.Interfaces.MOD_HERO_ICONS : Assets.Interfaces.HERO_ICONS );
+		if (icon >= MOD_OFFSET){
+			if (modFilm == null){
+				modFilm = new TextureFilm(texture, SIZE, SIZE);
+			}
+			frame(modFilm.get(icon - MOD_OFFSET));
+		} else {
+			if (film == null){
+				film = new TextureFilm(texture, SIZE, SIZE);
+			}
+			frame(film.get(icon));
 		}
-		frame(film.get(song.icon()));
 	}
 
 }

@@ -43,8 +43,7 @@ public class RequiemSong extends Song {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.HALLOWED_GROUND;
+		return HeroIcon.REQUIEM;
 	}
 
 	@Override

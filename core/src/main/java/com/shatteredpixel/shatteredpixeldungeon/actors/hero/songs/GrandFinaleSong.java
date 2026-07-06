@@ -47,8 +47,7 @@ public class GrandFinaleSong extends Song {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.JUDGEMENT;
+		return HeroIcon.GRAND_FINALE;
 	}
 
 	@Override

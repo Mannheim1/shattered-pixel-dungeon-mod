@@ -96,6 +96,12 @@ public class Assets {
 		public static final String HERO_ICONS       = "interfaces/hero_icons.png";
 
 		public static final String RADIAL_MENU      = "interfaces/radial_menu.png";
+
+		//mod sheets, so modded content doesn't cause binary conflicts with upstream art
+		public static final String MOD_BUFFS_SMALL  = "interfaces/mod_buffs.png";
+		public static final String MOD_BUFFS_LARGE  = "interfaces/mod_large_buffs.png";
+		public static final String MOD_TALENT_ICONS = "interfaces/mod_talent_icons.png";
+		public static final String MOD_HERO_ICONS   = "interfaces/mod_hero_icons.png";
 	}
 
 	//these points to resource bundles, not raw asset files
@@ -244,6 +250,7 @@ public class Assets {
 		public static final String HUNTRESS = "splashes/huntress.jpg";
 		public static final String DUELIST  = "splashes/duelist.jpg";
 		public static final String CLERIC   = "splashes/cleric.jpg";
+		public static final String BARD     = "splashes/bard.jpg";
 
 		public static final String SEWERS   = "splashes/sewers.jpg";
 		public static final String PRISON   = "splashes/prison.jpg";
@@ -263,12 +270,16 @@ public class Assets {
 		public static final String ITEMS        = "sprites/items.png";
 		public static final String ITEM_ICONS   = "sprites/item_icons.png";
 
+		//mod sheet, so modded items don't cause binary conflicts with upstream art
+		public static final String MOD_ITEMS    = "sprites/mod_items.png";
+
 		public static final String WARRIOR  = "sprites/warrior.png";
 		public static final String MAGE     = "sprites/mage.png";
 		public static final String ROGUE    = "sprites/rogue.png";
 		public static final String HUNTRESS = "sprites/huntress.png";
 		public static final String DUELIST  = "sprites/duelist.png";
 		public static final String CLERIC   = "sprites/cleric.png";
+		public static final String BARD     = "sprites/bard.png";
 		public static final String AVATARS  = "sprites/avatars.png";
 		public static final String PET      = "sprites/pet.png";
 		public static final String AMULET   = "sprites/amulet.png";

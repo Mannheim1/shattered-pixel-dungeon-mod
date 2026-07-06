@@ -139,7 +139,7 @@ public class Marionette extends Buff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.MOMENTUM; //placeholder, no marionette icon yet
+		return BuffIndicator.MARIONETTE;
 	}
 
 	@Override

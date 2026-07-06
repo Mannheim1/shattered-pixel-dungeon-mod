@@ -84,7 +84,7 @@ public class Verses extends Buff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.MOMENTUM; //placeholder, no verses icon yet
+		return BuffIndicator.VERSES;
 	}
 
 	@Override

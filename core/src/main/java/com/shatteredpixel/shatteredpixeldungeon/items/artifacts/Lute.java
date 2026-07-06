@@ -51,7 +51,7 @@ import java.util.Arrays;
 public class Lute extends Artifact {
 
 	{
-		image = ItemSpriteSheet.SOMETHING; //placeholder, no lute sprite yet
+		image = ItemSpriteSheet.LUTE;
 
 		levelCap = 10;
 

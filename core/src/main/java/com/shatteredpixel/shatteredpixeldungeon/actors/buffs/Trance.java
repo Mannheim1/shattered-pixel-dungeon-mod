@@ -36,7 +36,7 @@ public class Trance extends FlavourBuff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.VERTIGO; //placeholder, no trance icon yet
+		return BuffIndicator.TRANCE;
 	}
 
 	@Override

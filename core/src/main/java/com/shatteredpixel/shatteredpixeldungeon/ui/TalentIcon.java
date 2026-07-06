@@ -29,18 +29,26 @@ import com.watabou.noosa.TextureFilm;
 public class TalentIcon extends Image {
 
 	private static TextureFilm film;
+	private static TextureFilm modFilm;
 	private static final int SIZE = 16;
+
+	//icons at or above this value are on the mod talent icon sheet, at (icon - MOD_OFFSET)
+	public static final int MOD_OFFSET = 1000;
 
 	public TalentIcon(Talent talent){
 		this(talent.icon());
 	}
 
 	public TalentIcon(int icon){
-		super( Assets.Interfaces.TALENT_ICONS );
+		super( icon >= MOD_OFFSET ? Assets.Interfaces.MOD_TALENT_ICONS : Assets.Interfaces.TALENT_ICONS );
 
-		if (film == null) film = new TextureFilm(texture, SIZE, SIZE);
-
-		frame(film.get(icon));
+		if (icon >= MOD_OFFSET){
+			if (modFilm == null) modFilm = new TextureFilm(texture, SIZE, SIZE);
+			frame(modFilm.get(icon - MOD_OFFSET));
+		} else {
+			if (film == null) film = new TextureFilm(texture, SIZE, SIZE);
+			frame(film.get(icon));
+		}
 	}
 
 }

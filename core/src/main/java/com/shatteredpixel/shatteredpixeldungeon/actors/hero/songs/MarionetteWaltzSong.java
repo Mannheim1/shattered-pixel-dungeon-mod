@@ -43,8 +43,7 @@ public class MarionetteWaltzSong extends TargetedSong {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.HOLY_WEAPON;
+		return HeroIcon.MARIONETTE_WALTZ;
 	}
 
 	@Override

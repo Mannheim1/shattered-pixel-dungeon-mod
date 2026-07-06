@@ -78,7 +78,7 @@ public class LaidToRest extends Buff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.CORRUPT; //placeholder, no laid to rest icon yet
+		return BuffIndicator.LAID_TO_REST;
 	}
 
 	@Override

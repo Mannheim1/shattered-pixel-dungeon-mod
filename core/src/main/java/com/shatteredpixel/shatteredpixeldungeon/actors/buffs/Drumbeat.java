@@ -62,7 +62,7 @@ public class Drumbeat extends FlavourBuff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.FURY; //placeholder, no drumbeat icon yet
+		return BuffIndicator.DRUMBEAT;
 	}
 
 	@Override

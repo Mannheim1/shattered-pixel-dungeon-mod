@@ -65,8 +65,7 @@ public class WinterWindSong extends Song {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.RECALL_GLYPH;
+		return HeroIcon.WINTER_WIND;
 	}
 
 	@Override

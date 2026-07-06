@@ -48,8 +48,7 @@ public class DirgeSong extends TargetedSong {
 
 	@Override
 	public int icon() {
-		//placeholder, no song icons exist yet
-		return HeroIcon.CLEANSE;
+		return HeroIcon.DIRGE;
 	}
 
 	@Override

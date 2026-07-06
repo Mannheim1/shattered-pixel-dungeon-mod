@@ -29,9 +29,11 @@ import com.watabou.noosa.TextureFilm;
 public class BuffIcon extends Image {
 
 	private static TextureFilm smallFilm;
+	private static TextureFilm modSmallFilm;
 	private static final int SML_SIZE = 7;
 
 	private static TextureFilm largeFilm;
+	private static TextureFilm modLargeFilm;
 	private static final int LRG_SIZE = 16;
 
 	private final boolean large;
@@ -54,12 +56,25 @@ public class BuffIcon extends Image {
 	}
 
 	public void refresh(int icon){
-		if (large){
-			if (largeFilm == null) largeFilm = new TextureFilm(texture, LRG_SIZE, LRG_SIZE);
-			frame(largeFilm.get(icon));
+		if (icon >= BuffIndicator.MOD_OFFSET){
+			//mod icons live on the mod buff sheets, at (icon - MOD_OFFSET)
+			texture( large ? Assets.Interfaces.MOD_BUFFS_LARGE : Assets.Interfaces.MOD_BUFFS_SMALL );
+			if (large){
+				if (modLargeFilm == null) modLargeFilm = new TextureFilm(texture, LRG_SIZE, LRG_SIZE);
+				frame(modLargeFilm.get(icon - BuffIndicator.MOD_OFFSET));
+			} else {
+				if (modSmallFilm == null ) modSmallFilm = new TextureFilm(texture, SML_SIZE, SML_SIZE);
+				frame(modSmallFilm.get(icon - BuffIndicator.MOD_OFFSET));
+			}
 		} else {
-			if (smallFilm == null ) smallFilm = new TextureFilm(texture, SML_SIZE, SML_SIZE);
-			frame(smallFilm.get(icon));
+			texture( large ? Assets.Interfaces.BUFFS_LARGE : Assets.Interfaces.BUFFS_SMALL );
+			if (large){
+				if (largeFilm == null) largeFilm = new TextureFilm(texture, LRG_SIZE, LRG_SIZE);
+				frame(largeFilm.get(icon));
+			} else {
+				if (smallFilm == null ) smallFilm = new TextureFilm(texture, SML_SIZE, SML_SIZE);
+				frame(smallFilm.get(icon));
+			}
 		}
 	}
 

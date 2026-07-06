@@ -333,6 +333,8 @@ public enum HeroClass {
 				return Assets.Sprites.DUELIST;
 			case CLERIC:
 				return Assets.Sprites.CLERIC;
+			case BARD:
+				return Assets.Sprites.BARD;
 		}
 	}
 
@@ -350,6 +352,8 @@ public enum HeroClass {
 				return Assets.Splashes.DUELIST;
 			case CLERIC:
 				return Assets.Splashes.CLERIC;
+			case BARD:
+				return Assets.Splashes.BARD;
 		}
 	}
 	

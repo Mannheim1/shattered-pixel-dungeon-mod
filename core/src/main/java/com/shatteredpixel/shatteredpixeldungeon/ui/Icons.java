@@ -471,7 +471,7 @@ public enum Icons {
 			case CLERIC:
 				return new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME);
 			case BARD:
-				return new ItemSprite(ItemSpriteSheet.SOMETHING);
+				return new ItemSprite(ItemSpriteSheet.LUTE);
 			default:
 				return null;
 		}

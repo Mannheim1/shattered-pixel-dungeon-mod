@@ -198,14 +198,14 @@ public enum Talent {
 	//Power of Many T4
 	BEAMING_RAY(183, 4), LIFE_LINK(184, 4), STASIS(185, 4),
 
-	//Bard T1 (placeholder icons, reusing the warrior's until bard talent art exists)
-	DINNER_SHOW(0), PERFECT_PITCH(1), ACCENTED_STRIKE(2), CLOSING_CHORD(3),
+	//Bard T1 (icons 1000+ are on the mod talent icon sheet, at index-1000)
+	DINNER_SHOW(1192), PERFECT_PITCH(1193), ACCENTED_STRIKE(1194), CLOSING_CHORD(1195),
 	//Bard T2
-	MUSICIANS_MEAL(4), LIQUID_CADENZA(5), REVERB(6), ECHOLOCATION(7), SIGHT_READING(8),
+	MUSICIANS_MEAL(1196), LIQUID_CADENZA(1197), REVERB(1198), ECHOLOCATION(1199), SIGHT_READING(1200),
 	//Bard T3
-	TRAVELING_MUSICIAN(9, 3), ENCORE(10, 3),
-	//Skald T3 (placeholder icons again)
-	WHETTED_BLADE(14, 3), EXTENDED_BALLAD(15, 3), ROUSING_VERSE(16, 3),
+	TRAVELING_MUSICIAN(1201, 3), ENCORE(1202, 3),
+	//Skald T3
+	WHETTED_BLADE(1203, 3), EXTENDED_BALLAD(1204, 3), ROUSING_VERSE(1205, 3),
 
 	//universal T4
 	HEROIC_ENERGY(26, 4), //See icon() and title() for special logic for this one

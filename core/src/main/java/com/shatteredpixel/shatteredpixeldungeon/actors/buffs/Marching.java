@@ -36,7 +36,7 @@ public class Marching extends FlavourBuff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.HASTE; //placeholder, no marching icon yet
+		return BuffIndicator.MARCHING;
 	}
 
 	@Override

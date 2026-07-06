@@ -50,7 +50,7 @@ public enum HeroSubClass {
 	PRIEST(HeroIcon.PRIEST),
 	PALADIN(HeroIcon.PALADIN),
 
-	SKALD(HeroIcon.GLADIATOR); //placeholder icon, no skald icon yet
+	SKALD(HeroIcon.SKALD);
 
 	int icon;
 
