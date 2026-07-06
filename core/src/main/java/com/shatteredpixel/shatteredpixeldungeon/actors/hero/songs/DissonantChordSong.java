@@ -93,7 +93,7 @@ public class DissonantChordSong extends TargetedSong {
 
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
-		ch.damage(damageRoll(lute), this);
+		ch.damage(modifyDamage(damageRoll(lute)), this);
 		Sample.INSTANCE.play(Assets.Sounds.HIT_MAGIC, 1, Random.Float(0.87f, 1.15f));
 		if (ch.sprite != null) {
 			ch.sprite.burst(0xFFFFFF44, 3);

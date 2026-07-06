@@ -80,7 +80,7 @@ public class GrandFinaleSong extends Song {
 				if (debuffs > 0) {
 					ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.2f, 5);
 					ch.sprite.burst(0xFFFFFF44, 5);
-					ch.damage(Random.NormalIntRange(8 * debuffs, 12 * debuffs), this);
+					ch.damage(modifyDamage(Random.NormalIntRange(8 * debuffs, 12 * debuffs)), this);
 				}
 			}
 		}

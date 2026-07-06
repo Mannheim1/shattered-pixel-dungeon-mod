@@ -24,7 +24,9 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Verses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
@@ -107,15 +109,48 @@ public abstract class Song {
 			lute.directCharge(chargeUse(hero));
 			GLog.p(Messages.get(Song.class, "encore"));
 		}
+
+		//the skald's verses are all spent by playing a song
+		Verses verses = hero.buff(Verses.class);
+		if (verses != null){
+			verses.detach();
+		}
+
+		//whetted blade: playing a song whets the skald's next attacks
+		if (hero.subClass == HeroSubClass.SKALD && hero.hasTalent(Talent.WHETTED_BLADE)){
+			Talent.WhettedBladeTracker whet = Buff.affect(hero, Talent.WhettedBladeTracker.class);
+			float attacks = hero.pointsInTalent(Talent.WHETTED_BLADE);
+			if (whet.count() < attacks){
+				whet.countUp(attacks - whet.count());
+			}
+		}
 	}
 
-	//applies talent effects (e.g. liquid cadenza) to the duration of a song's effect
+	//applies talent and subclass effects (e.g. liquid cadenza, verses) to the duration of a song's effect
 	public static float modifyDuration(float baseDuration){
 		Hero hero = Dungeon.hero;
-		if (hero != null && hero.buff(Talent.LiquidCadenzaTracker.class) != null){
-			baseDuration *= 1f + 0.25f*hero.pointsInTalent(Talent.LIQUID_CADENZA);
+		if (hero != null){
+			if (hero.buff(Talent.LiquidCadenzaTracker.class) != null){
+				baseDuration *= 1f + 0.25f*hero.pointsInTalent(Talent.LIQUID_CADENZA);
+			}
+			Verses verses = hero.buff(Verses.class);
+			if (verses != null){
+				baseDuration *= 1f + 0.2f*verses.verses();
+			}
 		}
 		return baseDuration;
+	}
+
+	//applies subclass effects (verses) to the damage a song deals
+	public static int modifyDamage(int damage){
+		Hero hero = Dungeon.hero;
+		if (hero != null){
+			Verses verses = hero.buff(Verses.class);
+			if (verses != null){
+				damage = Math.round(damage * (1f + 0.2f*verses.verses()));
+			}
+		}
+		return damage;
 	}
 
 	public static ArrayList<Song> getAllSongs(){

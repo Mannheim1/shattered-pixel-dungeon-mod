@@ -204,6 +204,8 @@ public enum Talent {
 	MUSICIANS_MEAL(4), LIQUID_CADENZA(5), REVERB(6), ECHOLOCATION(7), SIGHT_READING(8),
 	//Bard T3
 	TRAVELING_MUSICIAN(9, 3), ENCORE(10, 3),
+	//Skald T3 (placeholder icons again)
+	WHETTED_BLADE(14, 3), EXTENDED_BALLAD(15, 3), ROUSING_VERSE(16, 3),
 
 	//universal T4
 	HEROIC_ENERGY(26, 4), //See icon() and title() for special logic for this one
@@ -218,6 +220,7 @@ public enum Talent {
 	public static class LethalMomentumTracker extends FlavourBuff{};
 	public static class DinnerShowTracker extends CounterBuff{{revivePersists = true;}};
 	public static class LiquidCadenzaTracker extends CounterBuff{{revivePersists = true;}};
+	public static class WhettedBladeTracker extends CounterBuff{{revivePersists = true;}};
 	public static class StrikingWaveTracker extends FlavourBuff{};
 	public static class WandPreservationCounter extends CounterBuff{{revivePersists = true;}};
 	public static class EmpoweredStrikeTracker extends FlavourBuff{
@@ -1155,6 +1158,9 @@ public enum Talent {
 				break;
 			case PALADIN:
 				Collections.addAll(tierTalents, LAY_ON_HANDS, AURA_OF_PROTECTION, WALL_OF_LIGHT);
+				break;
+			case SKALD:
+				Collections.addAll(tierTalents, WHETTED_BLADE, EXTENDED_BALLAD, ROUSING_VERSE);
 				break;
 		}
 		for (Talent talent : tierTalents){

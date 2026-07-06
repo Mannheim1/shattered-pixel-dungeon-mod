@@ -94,8 +94,8 @@ public enum HeroClass {
 	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
 	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK ),
 	CLERIC( HeroSubClass.PRIEST, HeroSubClass.PALADIN ),
-	//placeholder: reuses warrior subclasses, talents, and visuals for now
-	BARD( HeroSubClass.BERSERKER, HeroSubClass.GLADIATOR );
+	//gladiator is a placeholder second subclass until the maestro is implemented
+	BARD( HeroSubClass.SKALD, HeroSubClass.GLADIATOR );
 
 	private HeroSubClass[] subClasses;
 

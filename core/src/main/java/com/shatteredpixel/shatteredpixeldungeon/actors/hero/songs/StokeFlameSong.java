@@ -96,7 +96,7 @@ public class StokeFlameSong extends Song {
 
 			//enemies that were already burning take an immediate burst of damage
 			if (ch.buff(Burning.class) != null) {
-				ch.damage(Hero.heroDamageIntRange(4, 10), this);
+				ch.damage(modifyDamage(Hero.heroDamageIntRange(4, 10)), this);
 			}
 
 			//then everything still standing is set ablaze

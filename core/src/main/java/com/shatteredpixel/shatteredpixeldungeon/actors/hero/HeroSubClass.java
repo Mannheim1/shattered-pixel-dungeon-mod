@@ -48,7 +48,9 @@ public enum HeroSubClass {
 	MONK(HeroIcon.MONK),
 
 	PRIEST(HeroIcon.PRIEST),
-	PALADIN(HeroIcon.PALADIN);
+	PALADIN(HeroIcon.PALADIN),
+
+	SKALD(HeroIcon.GLADIATOR); //placeholder icon, no skald icon yet
 
 	int icon;
 

@@ -59,6 +59,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Trance;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Verses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invulnerability;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LifeLink;
@@ -432,6 +433,21 @@ public abstract class Char extends Actor {
 					&& Dungeon.hero.hasTalent(Talent.ACCENTED_STRIKE)
 					&& GrandFinaleSong.bardicDebuffs(enemy) > 0){
 				dmg += 1 + Dungeon.hero.pointsInTalent(Talent.ACCENTED_STRIKE);
+			}
+
+			//whetted blade: the skald's attacks after a song deal bonus damage
+			if (this == Dungeon.hero && buff(Talent.WhettedBladeTracker.class) != null){
+				Talent.WhettedBladeTracker whet = buff(Talent.WhettedBladeTracker.class);
+				dmg *= 1.25f;
+				whet.countDown(1);
+				if (whet.count() <= 0){
+					whet.detach();
+				}
+			}
+
+			//the skald builds verses by landing weapon attacks
+			if (this == Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.SKALD){
+				Buff.affect(Dungeon.hero, Verses.class).addVerse();
 			}
 
 			if (enemy.buff(GuidingLight.Illuminated.class) != null){
