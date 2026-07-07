@@ -58,10 +58,10 @@ public class ItemSpriteSheet {
 		modFilm.add( item, x, y, x+width, y+height);
 	}
 
-	//bard items, on the bottom row of the mod items sheet
-	public static final int LUTE        = MOD_OFFSET+508;
-	public static final int SHEET_MUSIC = MOD_OFFSET+509;
-	public static final int SHILLELAGH  = MOD_OFFSET+510;
+	//bard items, on the first row of the mod items sheet
+	public static final int LUTE        = MOD_OFFSET+0;
+	public static final int SHEET_MUSIC = MOD_OFFSET+1;
+	public static final int SHILLELAGH  = MOD_OFFSET+2;
 	static {
 		assignModItemRect(LUTE,        16, 16);
 		assignModItemRect(SHEET_MUSIC, 16, 16);
