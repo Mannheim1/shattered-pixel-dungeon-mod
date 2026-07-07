@@ -32,8 +32,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DanceSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DissonantChordSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.Song;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.TranceSong;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -53,6 +55,7 @@ public class Lute extends Artifact {
 	{
 		image = ItemSpriteSheet.LUTE;
 
+		exp = 0;
 		levelCap = 10;
 
 		charge = Math.min(level()+3, 10);
@@ -191,6 +194,26 @@ public class Lute extends Artifact {
 			Dungeon.hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(shield), FloatingText.SHIELDING);
 		}
 
+		//target hero level is 1 + 2*lute level
+		int lvlDiffFromTarget = Dungeon.hero.lvl - (1+level()*2);
+		//plus an extra one for each level after 6
+		if (level() >= 7){
+			lvlDiffFromTarget -= level()-6;
+		}
+
+		if (lvlDiffFromTarget >= 0){
+			exp += Math.round(chargesSpent * 10f * Math.pow(1.1f, lvlDiffFromTarget));
+		} else {
+			exp += Math.round(chargesSpent * 10f * Math.pow(0.75f, -lvlDiffFromTarget));
+		}
+
+		if (exp >= (level() + 1) * 50 && level() < levelCap) {
+			upgrade();
+			Catalog.countUse(Lute.class);
+			exp -= level() * 50;
+			GLog.p(Messages.get(this, "levelup"));
+		}
+
 		updateQuickslot();
 	}
 
@@ -214,6 +237,12 @@ public class Lute extends Artifact {
 		charge = chargeCap;
 		partialCharge = 0;
 		updateQuickslot();
+	}
+
+	@Override
+	public Item upgrade() {
+		chargeCap = Math.min(chargeCap + 1, 10);
+		return super.upgrade();
 	}
 
 	private static final String KNOWN_SONGS = "known_songs";
