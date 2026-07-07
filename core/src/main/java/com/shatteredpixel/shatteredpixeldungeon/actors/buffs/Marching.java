@@ -24,10 +24,11 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
-//applied by the bard's march song. Doubles movement speed, but breaks when the bearer attacks
+//applied by the bard's march song. Doubles movement speed, but breaks when the bearer attacks.
+//also halts hunger gain and starvation damage while active (see Hunger.act)
 public class Marching extends FlavourBuff {
 
-	public static final float DURATION	= 20f;
+	public static final float DURATION	= 100f;
 
 	{
 		type = buffType.POSITIVE;

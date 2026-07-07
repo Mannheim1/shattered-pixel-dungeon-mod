@@ -65,6 +65,7 @@ public class Hunger extends Buff implements Hero.Doom {
 
 		if (Dungeon.level.locked
 				|| target.buff(WellFed.class) != null
+				|| target.buff(Marching.class) != null
 				|| SPDSettings.intro()
 				|| target.buff(ScrollOfChallenge.ChallengeArena.class) != null
 				|| Dungeon.level instanceof VaultLevel){
