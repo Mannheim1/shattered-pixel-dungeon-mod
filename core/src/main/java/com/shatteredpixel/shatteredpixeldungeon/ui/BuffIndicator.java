@@ -141,14 +141,14 @@ public class BuffIndicator extends Component {
 	public static final int MOD_OFFSET  = 1000;
 
 	//bard buffs
-	public static final int TRANCE          = MOD_OFFSET+120;
-	public static final int DANCING         = MOD_OFFSET+121;
-	public static final int SILENCED        = MOD_OFFSET+122;
-	public static final int MARCHING        = MOD_OFFSET+123;
-	public static final int DRUMBEAT        = MOD_OFFSET+124;
-	public static final int MARIONETTE      = MOD_OFFSET+125;
-	public static final int LAID_TO_REST    = MOD_OFFSET+126;
-	public static final int VERSES          = MOD_OFFSET+127;
+	public static final int TRANCE          = MOD_OFFSET+0;
+	public static final int DANCING         = MOD_OFFSET+1;
+	public static final int SILENCED        = MOD_OFFSET+2;
+	public static final int MARCHING        = MOD_OFFSET+3;
+	public static final int DRUMBEAT        = MOD_OFFSET+4;
+	public static final int MARIONETTE      = MOD_OFFSET+5;
+	public static final int LAID_TO_REST    = MOD_OFFSET+6;
+	public static final int VERSES          = MOD_OFFSET+7;
 
 	public static final int SIZE_SMALL  = 7;
 	public static final int SIZE_LARGE  = 16;
