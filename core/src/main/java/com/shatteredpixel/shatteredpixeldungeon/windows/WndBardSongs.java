@@ -36,9 +36,14 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RightClickMenu;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.input.PointerEvent;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.NinePatch;
+import com.watabou.utils.DeviceCompat;
+import com.watabou.utils.PointF;
 
 import java.util.ArrayList;
 
@@ -74,8 +79,10 @@ public class WndBardSongs extends Window {
 		RenderedTextBlock msg;
 		if (info){
 			msg = PixelScene.renderTextBlock( Messages.get( this, "info_desc"), 6);
+		} else if (DeviceCompat.isDesktop()){
+			msg = PixelScene.renderTextBlock( Messages.get( this, "cast_desc_desktop"), 6);
 		} else {
-			msg = PixelScene.renderTextBlock( Messages.get( this, "cast_desc"), 6);
+			msg = PixelScene.renderTextBlock( Messages.get( this, "cast_desc_mobile"), 6);
 		}
 		msg.maxWidth(WIDTH);
 		msg.setPos(0, title.bottom()+4);
@@ -176,6 +183,57 @@ public class WndBardSongs extends Window {
 				}
 
 			}
+		}
+
+		@Override
+		protected boolean onLongClick() {
+			hide();
+			lute.setQuickSong(song);
+			return true;
+		}
+
+		@Override
+		protected void onRightClick() {
+			super.onRightClick();
+			RightClickMenu r = new RightClickMenu(new Image(icon),
+					Messages.titleCase(song.name()),
+					Messages.get(WndBardSongs.class, "cast"),
+					Messages.get(WndBardSongs.class, "info"),
+					Messages.get(WndBardSongs.class, "quick_cast")){
+				@Override
+				public void onSelect(int index) {
+					switch (index){
+						default:
+							//do nothing
+							break;
+						case 0:
+							hide();
+							if (!lute.canPlay(Dungeon.hero, song)){
+								GLog.w(Messages.get(Lute.class, "no_song"));
+							} else {
+								song.onCast(lute, Dungeon.hero);
+
+								if (song.targetingFlags() != -1 && Dungeon.quickslot.contains(lute)){
+									lute.targetingSong = song;
+									QuickSlotButton.useTargeting(Dungeon.quickslot.getSlot(lute));
+								}
+							}
+							break;
+						case 1:
+							GameScene.show(new WndTitledMessage(new HeroIcon(song), Messages.titleCase(song.name()), song.desc()));
+							break;
+						case 2:
+							hide();
+							lute.setQuickSong(song);
+							break;
+					}
+				}
+			};
+			parent.addToFront(r);
+			r.camera = camera();
+			PointF mousePos = PointerEvent.currentHoverPos();
+			mousePos = camera.screenToCamera((int)mousePos.x, (int)mousePos.y);
+			r.setPos(mousePos.x-3, mousePos.y-3);
 		}
 
 		@Override

@@ -25,7 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drumbeat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.audio.Sample;
@@ -39,19 +39,33 @@ public class DrumbeatSong extends Song {
 		return HeroIcon.DRUMBEAT;
 	}
 
+	public static int dmgPerBeat(int lvl) {
+		return 10 + lvl;
+	}
+
+	@Override
+	public int noteColor() {
+		return 0xFFFF66;
+	}
+
 	@Override
 	public void onCast(Lute lute, Hero hero) {
 
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.HIT_CRUSH, 1f, 0.8f);
-		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
+		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 
-		Buff.prolong(hero, Drumbeat.class, modifyDuration(Drumbeat.DURATION)).addBeat();
+		Buff.prolong(hero, Drumbeat.class, modifyDuration(Drumbeat.DURATION)).addBeat(dmgPerBeat(lute.buffedLvl()));
 
 		hero.spend(1f);
 		hero.next();
 
 		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected Object[] descArgs() {
+		return new Object[]{ dmgPerBeat(luteLvl()) };
 	}
 
 }

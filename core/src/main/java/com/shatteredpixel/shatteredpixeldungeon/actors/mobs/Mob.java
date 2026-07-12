@@ -1245,8 +1245,10 @@ public abstract class Mob extends Char {
 
 			//don't evaluate canAttack when there's no enemy, enemyInFOV ensures enemy is non-null
 			boolean canAttack = enemyInFOV && canAttack( enemy );
-			//silenced characters cannot attack from range
-			if (canAttack && buff(Silenced.class) != null && !Dungeon.level.adjacent(pos, enemy.pos)){
+			//silenced characters cannot use magical attacks from range
+			if (canAttack && buff(Silenced.class) != null
+					&& !Dungeon.level.adjacent(pos, enemy.pos)
+					&& Silenced.blocksRangedAttack(Mob.this)){
 				canAttack = false;
 			}
 

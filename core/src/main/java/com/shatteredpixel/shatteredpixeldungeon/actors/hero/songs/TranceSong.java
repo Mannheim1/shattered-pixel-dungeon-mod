@@ -21,21 +21,13 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Trance;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.audio.Sample;
 
 public class TranceSong extends TargetedSong {
 
@@ -47,41 +39,23 @@ public class TranceSong extends TargetedSong {
 	}
 
 	@Override
-	protected void onTargetSelected(Lute lute, Hero hero, Integer target) {
-		if (target == null) {
-			return;
-		}
+	public int noteColor() {
+		return 0x04EB00;
+	}
 
-		Ballistica aim = new Ballistica(hero.pos, target, targetingFlags());
-		Char ch = Actor.findChar(aim.collisionPos);
-
-		if (ch == hero) {
-			GLog.i(Messages.get(Wand.class, "self_target"));
-			return;
-		} else if (ch == null) {
-			GLog.w(Messages.get(this, "no_target"));
-			return;
-		}
-
-		QuickSlotButton.target(ch);
-
-		hero.sprite.operate(hero.pos);
-		Sample.INSTANCE.play(Assets.Sounds.LULLABY);
-		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-
-		affectTarget(lute, hero, ch);
-		maybeReverb(lute, hero, ch);
-
-		hero.spend(1f);
-		hero.next();
-
-		onSongCast(lute, hero);
+	public static float duration(int lvl) {
+		return Trance.DURATION + lvl;
 	}
 
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
-		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-		Buff.prolong(ch, Trance.class, modifyDuration(Trance.DURATION));
+		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
+		Buff.prolong(ch, Trance.class, modifyDuration(duration(lute.buffedLvl())));
+	}
+
+	@Override
+	protected Object[] descArgs() {
+		return new Object[]{ (int)duration(luteLvl()) };
 	}
 
 }

@@ -27,7 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 //applied by the bard's trance song. -20% accuracy and evasion, -50% movement speed
 public class Trance extends FlavourBuff {
 
-	public static final float DURATION	= 10f;
+	public static final float DURATION	= 5f;
 
 	{
 		type = buffType.NEGATIVE;

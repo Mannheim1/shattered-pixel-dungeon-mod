@@ -21,14 +21,51 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalWisp;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Eye;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.FungalSentry;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Shaman;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Warlock;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogFist;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
-//applied by the bard's nocturne song. Silenced characters cannot attack from range,
-// which neuters casters. Melee attacks are unaffected.
+import java.util.Arrays;
+import java.util.HashSet;
+
+//applied by the bard's nocturne song. Silenced characters cannot use magical attacks
+// from range, which neuters casters. Melee and physical ranged attacks are unaffected.
 public class Silenced extends FlavourBuff {
 
-	public static final float DURATION	= 20f;
+	public static final float DURATION	= 5f;
+
+	//mobs which attack from a distance using magic, whose ranged attacks are blocked
+	// while silenced. Subclasses (e.g. shaman variants) are included automatically.
+	//centralized here, like AntiMagic.RESISTS, so upstream mob files stay unmodified.
+	//NOTE: when merging future updates, any new ranged caster must be added here
+	// manually, or silence will have no effect on it
+	public static final HashSet<Class> MAGICAL_RANGED_MOBS = new HashSet<>(Arrays.asList(
+			Shaman.class,
+			CrystalWisp.class,
+			DM100.class,
+			Elemental.class,
+			Eye.class,
+			FungalSentry.class,
+			Warlock.class,
+			YogFist.class
+	));
+
+	public static boolean blocksRangedAttack( Mob mob ){
+		for (Class<?> cls : MAGICAL_RANGED_MOBS){
+			if (cls.isInstance(mob)){
+				return true;
+			}
+		}
+		return false;
+	}
 
 	{
 		type = buffType.NEGATIVE;

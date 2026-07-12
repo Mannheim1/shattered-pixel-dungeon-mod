@@ -41,11 +41,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.PathFinder;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -54,8 +57,20 @@ public class WinterWindSong extends Song {
 
 	public static final WinterWindSong INSTANCE = new WinterWindSong();
 
-	private static final int WIND_RADIUS    = 4;
-	private static final int PUSH_DISTANCE  = 3;
+	//the wind's radius grows from 4 to 8 tiles by lute level 10
+	public static int radius(int lvl) {
+		return 4 + 2*lvl/5;
+	}
+
+	//gases are pushed further as the lute levels, from 3 to 6 tiles
+	public static int pushDistance(int lvl) {
+		return 3 + 3*lvl/10;
+	}
+
+	//the chill on caught enemies lengthens from 5 to 10 turns
+	public static float chillDuration(int lvl) {
+		return 5 + lvl/2f;
+	}
 
 	//gas-like blobs which the wind can push around
 	private static final Class<?>[] PUSHABLE_GASES = new Class<?>[]{
@@ -69,15 +84,24 @@ public class WinterWindSong extends Song {
 	}
 
 	@Override
+	public int noteColor() {
+		return 0x88CCFF;
+	}
+
+	@Override
 	public void onCast(Lute lute, Hero hero) {
 
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.PUFF);
+		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
+		hero.sprite.centerEmitter().burst(GustParticle.FACTORY, 30);
+
+		int lvl = lute.buffedLvl();
 
 		//all non-solid cells within the wind's radius, including the hero's own cell
 		ArrayList<Integer> cells = new ArrayList<>();
 		for (int i = 0; i < Dungeon.level.length(); i++) {
-			if (!Dungeon.level.solid[i] && Dungeon.level.distance(hero.pos, i) <= WIND_RADIUS) {
+			if (!Dungeon.level.solid[i] && Dungeon.level.distance(hero.pos, i) <= radius(lvl)) {
 				cells.add(i);
 			}
 		}
@@ -94,7 +118,7 @@ public class WinterWindSong extends Song {
 			for (int cell : cells) {
 				int vol = gas.cur[cell];
 				if (vol > 0) {
-					int dest = pushDest(hero.pos, cell);
+					int dest = pushDest(hero.pos, cell, pushDistance(lvl));
 					if (dest != cell) {
 						moves.add(new int[]{cell, dest, vol});
 					}
@@ -126,7 +150,7 @@ public class WinterWindSong extends Song {
 					ch.buff(Burning.class).detach();
 				}
 				if (ch != hero) {
-					Buff.affect(ch, Chill.class, 5f);
+					Buff.affect(ch, Chill.class, chillDuration(lvl));
 				}
 			}
 		}
@@ -137,8 +161,33 @@ public class WinterWindSong extends Song {
 		onSongCast(lute, hero);
 	}
 
-	//walks up to PUSH_DISTANCE steps away from the wind's origin, stopping at solid terrain
-	private static int pushDest(int origin, int cell) {
+	@Override
+	protected Object[] descArgs() {
+		int lvl = luteLvl();
+		return new Object[]{ radius(lvl), (int)chillDuration(lvl), pushDistance(lvl) };
+	}
+
+	//snow that gusts outward from the bard, rather than drifting downward in place
+	public static class GustParticle extends SnowParticle {
+
+		public static final Emitter.Factory FACTORY = new Emitter.Factory() {
+			@Override
+			public void emit( Emitter emitter, int index, float x, float y ) {
+				((GustParticle)emitter.recycle( GustParticle.class )).reset( x, y );
+			}
+		};
+
+		@Override
+		public void reset( float x, float y ) {
+			super.reset( x, y );
+			//fly outward in a random direction instead of falling in place
+			this.y = y;
+			speed.polar( Random.Float( PointF.PI2 ), Random.Float( 24, 72 ) );
+		}
+	}
+
+	//walks up to pushDist steps away from the wind's origin, stopping at solid terrain
+	private static int pushDest(int origin, int cell, int pushDist) {
 
 		int width = Dungeon.level.width();
 		int dx = (cell % width) - (origin % width);
@@ -163,7 +212,7 @@ public class WinterWindSong extends Song {
 		}
 
 		int dest = cell;
-		for (int i = 0; i < PUSH_DISTANCE; i++) {
+		for (int i = 0; i < pushDist; i++) {
 			int next = dest + dx + dy * width;
 			if (Dungeon.level.solid[next]) {
 				break;

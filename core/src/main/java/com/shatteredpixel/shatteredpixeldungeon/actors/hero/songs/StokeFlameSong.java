@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -39,6 +40,9 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.noosa.particles.Emitter;
+import com.watabou.utils.PointF;
+import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
@@ -46,22 +50,41 @@ public class StokeFlameSong extends Song {
 
 	public static final StokeFlameSong INSTANCE = new StokeFlameSong();
 
-	private static final int STOKE_RADIUS = 4;
-
 	@Override
 	public int icon() {
 		return HeroIcon.STOKE_FLAME;
 	}
 
 	@Override
+	public int noteColor() {
+		return 0xFF7722;
+	}
+
+	//the song's radius grows from 4 to 8 tiles by lute level 10
+	public static int radius(int lvl) {
+		return 4 + 2*lvl/5;
+	}
+
+	//the burst against burning enemies scales linearly, to about 2x its base value at lute level 10
+	public static int min(int lvl) {
+		return Math.round(4 * (1f + 0.1f*lvl));
+	}
+
+	public static int max(int lvl) {
+		return Math.round(10 * (1f + 0.1f*lvl));
+	}
+
+	@Override
 	public void onCast(Lute lute, Hero hero) {
+
+		int lvl = lute.buffedLvl();
 
 		//gather affected enemies and ember tiles up front, so we can refuse a wasted cast
 		ArrayList<Char> enemies = new ArrayList<>();
 		ArrayList<Integer> embers = new ArrayList<>();
 
 		for (int i = 0; i < Dungeon.level.length(); i++) {
-			if (!Dungeon.level.solid[i] && Dungeon.level.distance(hero.pos, i) <= STOKE_RADIUS) {
+			if (!Dungeon.level.solid[i] && Dungeon.level.distance(hero.pos, i) <= radius(lvl)) {
 
 				if (Dungeon.level.map[i] == Terrain.EMBERS) {
 					embers.add(i);
@@ -82,6 +105,8 @@ public class StokeFlameSong extends Song {
 
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.BURNING);
+		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
+		hero.sprite.centerEmitter().burst(FLARE, 30);
 
 		//reignite embers into open flame
 		for (int cell : embers) {
@@ -95,7 +120,7 @@ public class StokeFlameSong extends Song {
 
 			//enemies that were already burning take an immediate burst of damage
 			if (ch.buff(Burning.class) != null) {
-				ch.damage(modifyDamage(Hero.heroDamageIntRange(4, 10)), this);
+				ch.damage(modifyDamage(Hero.heroDamageIntRange(min(lvl), max(lvl))), this);
 			}
 
 			//then everything still standing is set ablaze
@@ -111,5 +136,26 @@ public class StokeFlameSong extends Song {
 
 		onSongCast(lute, hero);
 	}
+
+	@Override
+	protected Object[] descArgs() {
+		int lvl = luteLvl();
+		return new Object[]{ radius(lvl), min(lvl), max(lvl) };
+	}
+
+	//flames that lick outward from the bard in all directions.
+	// safe to redirect recycled flames, as FlameParticle.reset always zeroes speed
+	private static final Emitter.Factory FLARE = new Emitter.Factory() {
+		@Override
+		public void emit( Emitter emitter, int index, float x, float y ) {
+			FlameParticle p = (FlameParticle)emitter.recycle( FlameParticle.class );
+			p.reset( x, y );
+			p.speed.polar( Random.Float( PointF.PI2 ), Random.Float( 32, 96 ) );
+		}
+		@Override
+		public boolean lightMode() {
+			return true;
+		}
+	};
 
 }

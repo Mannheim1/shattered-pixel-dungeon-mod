@@ -33,7 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Silenced;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Trance;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
@@ -45,9 +45,20 @@ public class GrandFinaleSong extends Song {
 
 	public static final GrandFinaleSong INSTANCE = new GrandFinaleSong();
 
+	public static final int RANGE = 10;
+
 	@Override
 	public int icon() {
 		return HeroIcon.GRAND_FINALE;
+	}
+
+	//damage per debuff scales linearly, to about 3x its base value at lute level 10
+	public static int min(int lvl) {
+		return Math.round(8 * (1f + 0.2f*lvl));
+	}
+
+	public static int max(int lvl) {
+		return Math.round(12 * (1f + 0.2f*lvl));
 	}
 
 	@Override
@@ -57,6 +68,7 @@ public class GrandFinaleSong extends Song {
 		for (Char ch : Actor.chars()) {
 			if (ch.alignment == Char.Alignment.ENEMY
 					&& Dungeon.level.heroFOV[ch.pos]
+					&& Dungeon.level.distance(hero.pos, ch.pos) <= RANGE
 					&& bardicDebuffs(ch) > 0) {
 				anyDebuffed = true;
 				break;
@@ -70,16 +82,18 @@ public class GrandFinaleSong extends Song {
 
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.BLAST);
-		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.2f, 8);
+		hero.sprite.centerEmitter().start(noteFactory(), 0.2f, 8);
 
+		int lvl = lute.buffedLvl();
 		for (Char ch : Actor.chars()) {
 			if (ch.alignment == Char.Alignment.ENEMY
-					&& Dungeon.level.heroFOV[ch.pos]) {
+					&& Dungeon.level.heroFOV[ch.pos]
+					&& Dungeon.level.distance(hero.pos, ch.pos) <= RANGE) {
 				int debuffs = bardicDebuffs(ch);
 				if (debuffs > 0) {
-					ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.2f, 5);
+					ch.sprite.centerEmitter().start(noteFactory(), 0.2f, 5);
 					ch.sprite.burst(0xFFFFFF44, 5);
-					ch.damage(modifyDamage(Random.NormalIntRange(8 * debuffs, 12 * debuffs)), this);
+					ch.damage(modifyDamage(Random.NormalIntRange(min(lvl) * debuffs, max(lvl) * debuffs)), this);
 				}
 			}
 		}
@@ -88,6 +102,12 @@ public class GrandFinaleSong extends Song {
 		hero.next();
 
 		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected Object[] descArgs() {
+		int lvl = luteLvl();
+		return new Object[]{ min(lvl), max(lvl) };
 	}
 
 	//counts all debuffs on a character which were applied by the bard's songs

@@ -28,7 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 //also halts hunger gain and starvation damage while active (see Hunger.act)
 public class Marching extends FlavourBuff {
 
-	public static final float DURATION	= 100f;
+	public static final float DURATION	= 30f;
 
 	{
 		type = buffType.POSITIVE;

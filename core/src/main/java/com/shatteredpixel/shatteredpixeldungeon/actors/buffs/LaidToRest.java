@@ -27,26 +27,45 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 //applied by the bard's requiem to undead and demonic enemies.
-// They take damage each turn and deal reduced damage.
+// They take damage each turn and deal reduced damage, both scaling with lute level.
 public class LaidToRest extends Buff {
 
 	public static final float DURATION	= 10f;
 
 	private int left = (int)DURATION;
+	private int luteLvl = 0;
 
 	{
 		type = buffType.NEGATIVE;
 		announced = true;
 	}
 
-	public void reset() {
+	public void set( int lvl ) {
 		left = (int)DURATION;
+		luteLvl = lvl;
+	}
+
+	public static int minDmg( int lvl ) {
+		return 2 + lvl/4;
+	}
+
+	public static int maxDmg( int lvl ) {
+		return 4 + lvl/2;
+	}
+
+	//the bearer's dealt damage is reduced by 25%, up to 50% at lute level 10
+	public static float dealtDamageFactor( int lvl ) {
+		return 0.75f - 0.025f*lvl;
+	}
+
+	public float damageFactor( float dmg ) {
+		return dmg * dealtDamageFactor(luteLvl);
 	}
 
 	@Override
 	public boolean act() {
 
-		target.damage(Random.NormalIntRange(1, 3), this);
+		target.damage(Random.NormalIntRange(minDmg(luteLvl), maxDmg(luteLvl)), this);
 
 		if (!target.isAlive()) {
 			return true;
@@ -63,17 +82,20 @@ public class LaidToRest extends Buff {
 	}
 
 	private static final String LEFT = "left";
+	private static final String LUTE_LVL = "lute_lvl";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(LEFT, left);
+		bundle.put(LUTE_LVL, luteLvl);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		left = bundle.getInt(LEFT);
+		luteLvl = bundle.getInt(LUTE_LVL);
 	}
 
 	@Override
@@ -83,7 +105,7 @@ public class LaidToRest extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", left);
+		return Messages.get(this, "desc", (int)(100 * (1f - dealtDamageFactor(luteLvl))), left);
 	}
 
 }

@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -45,6 +46,11 @@ public class DissonantChordSong extends TargetedSong {
 	@Override
 	public int icon() {
 		return HeroIcon.DISSONANT_CHORD;
+	}
+
+	@Override
+	public int noteColor() {
+		return 0xFF0000;
 	}
 
 	@Override
@@ -69,7 +75,7 @@ public class DissonantChordSong extends TargetedSong {
 		hero.busy();
 		Sample.INSTANCE.play(Assets.Sounds.ZAP);
 		hero.sprite.zap(target);
-		MagicMissile.boltFromChar(hero.sprite.parent, MagicMissile.MAGIC_MISSILE, hero.sprite, aim.collisionPos, new Callback() {
+		MagicMissile missile = MagicMissile.boltFromChar(hero.sprite.parent, MagicMissile.MAGIC_MISSILE, hero.sprite, aim.collisionPos, new Callback() {
 			@Override
 			public void call() {
 
@@ -88,6 +94,8 @@ public class DissonantChordSong extends TargetedSong {
 
 			}
 		});
+		//the missile is made of the song's notes, rather than its usual particles
+		missile.pour(noteFactory(), 0.03f);
 	}
 
 	@Override
@@ -99,16 +107,24 @@ public class DissonantChordSong extends TargetedSong {
 		}
 	}
 
+	//damages and scales like the wand of magic missile, but scales just slightly better
+	public static int min(int lvl) {
+		return 2 + lvl;
+	}
+
+	public static int max(int lvl) {
+		return 8 + 2*lvl + lvl/5;
+	}
+
 	public int damageRoll(Lute lute) {
-		return Hero.heroDamageIntRange(2 + lute.level() / 2, 8 + lute.level());
+		int lvl = lute.buffedLvl();
+		return Hero.heroDamageIntRange(min(lvl), max(lvl));
 	}
 
 	@Override
-	public String desc() {
-		Lute lute = Dungeon.hero.belongings.getItem(Lute.class);
-		int lvl = lute != null ? lute.level() : 0;
-		return Messages.get(this, "desc", 2 + lvl / 2, 8 + lvl)
-				+ "\n\n" + Messages.get(this, "charge_cost", (int)chargeUse(Dungeon.hero));
+	protected Object[] descArgs() {
+		int lvl = luteLvl();
+		return new Object[]{ min(lvl), max(lvl) };
 	}
 
 }

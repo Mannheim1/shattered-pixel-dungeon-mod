@@ -28,7 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LaidToRest;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
@@ -41,9 +41,16 @@ public class RequiemSong extends Song {
 
 	public static final RequiemSong INSTANCE = new RequiemSong();
 
+	public static final int RANGE = 10;
+
 	@Override
 	public int icon() {
 		return HeroIcon.REQUIEM;
+	}
+
+	@Override
+	public int noteColor() {
+		return 0xCCCCFF;
 	}
 
 	@Override
@@ -53,6 +60,7 @@ public class RequiemSong extends Song {
 		for (Char ch : Actor.chars()) {
 			if (ch.alignment == Char.Alignment.ENEMY
 					&& Dungeon.level.heroFOV[ch.pos]
+					&& Dungeon.level.distance(hero.pos, ch.pos) <= RANGE
 					&& (Char.hasProp(ch, Char.Property.UNDEAD) || Char.hasProp(ch, Char.Property.DEMONIC))) {
 				affected.add(ch);
 			}
@@ -65,17 +73,27 @@ public class RequiemSong extends Song {
 
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.GHOST);
-		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
+		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 
 		for (Char ch : affected) {
-			Buff.affect(ch, LaidToRest.class).reset();
-			ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 3);
+			Buff.affect(ch, LaidToRest.class).set(lute.buffedLvl());
+			ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 3);
 		}
 
 		hero.spend(1f);
 		hero.next();
 
 		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected Object[] descArgs() {
+		int lvl = luteLvl();
+		return new Object[]{
+				LaidToRest.minDmg(lvl),
+				LaidToRest.maxDmg(lvl),
+				(int)(100 * (1f - LaidToRest.dealtDamageFactor(lvl)))
+		};
 	}
 
 }

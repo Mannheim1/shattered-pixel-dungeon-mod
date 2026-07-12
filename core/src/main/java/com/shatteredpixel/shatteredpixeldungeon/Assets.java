@@ -29,6 +29,9 @@ public class Assets {
 		public static final String SPECKS       = "effects/specks.png";
 		public static final String SPELL_ICONS  = "effects/spell_icons.png";
 		public static final String TEXT_ICONS   = "effects/text_icons.png";
+
+		//mod-owned sheet of tintable musical note glyphs, used by the bard's songs
+		public static final String MOD_NOTE_SPECKS = "effects/mod_note_specks.png";
 	}
 
 	public static class Environment {

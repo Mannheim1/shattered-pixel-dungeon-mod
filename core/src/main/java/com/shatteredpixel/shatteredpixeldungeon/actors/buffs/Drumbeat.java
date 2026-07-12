@@ -26,38 +26,43 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
 
 //applied by the bard's drumbeat song. Each cast adds a beat and refreshes the duration,
-// the bearer deals +10% damage per beat. All beats are lost when the buff expires.
+// the bearer deals bonus damage per beat. All beats are lost when the buff expires.
 public class Drumbeat extends FlavourBuff {
 
 	public static final float DURATION	= 10f;
 
 	private int beats = 0;
+	private int dmgPerBeat = 10;
 
 	{
 		type = buffType.POSITIVE;
 		announced = true;
 	}
 
-	public void addBeat() {
+	public void addBeat( int dmgPer ) {
 		beats++;
+		dmgPerBeat = dmgPer;
 	}
 
 	public float damageFactor( float dmg ) {
-		return dmg * (1f + 0.10f * beats);
+		return dmg * (1f + (dmgPerBeat/100f) * beats);
 	}
 
 	private static final String BEATS = "beats";
+	private static final String DMG_PER_BEAT = "dmg_per_beat";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(BEATS, beats);
+		bundle.put(DMG_PER_BEAT, dmgPerBeat);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		beats = bundle.getInt(BEATS);
+		dmgPerBeat = bundle.getInt(DMG_PER_BEAT);
 	}
 
 	@Override
@@ -72,7 +77,7 @@ public class Drumbeat extends FlavourBuff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", beats, (int)(10*beats), dispTurns());
+		return Messages.get(this, "desc", beats, dmgPerBeat*beats, dispTurns());
 	}
 
 }

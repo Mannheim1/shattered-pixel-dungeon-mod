@@ -21,16 +21,24 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Callback;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
@@ -63,7 +71,59 @@ public abstract class TargetedSong extends Song {
 		return Messages.get(this, "prompt");
 	}
 
-	protected abstract void onTargetSelected(Lute lute, Hero hero, Integer target);
+	//the sound played when this song is cast
+	protected String castSound(){
+		return Assets.Sounds.LULLABY;
+	}
+
+	//targeted songs aim at a tile like wands do, sending a stream of notes at the
+	// target. If there is no one at the aimed tile, the song still plays and the
+	// charge is still spent
+	protected void onTargetSelected(Lute lute, Hero hero, Integer target) {
+		if (target == null) {
+			return;
+		}
+
+		Ballistica aim = new Ballistica(hero.pos, target, targetingFlags());
+
+		if (Actor.findChar(aim.collisionPos) == hero) {
+			GLog.i(Messages.get(Wand.class, "self_target"));
+			return;
+		}
+
+		if (Actor.findChar(aim.collisionPos) != null) {
+			QuickSlotButton.target(Actor.findChar(aim.collisionPos));
+		}
+
+		hero.busy();
+		hero.sprite.zap(aim.collisionPos);
+		Sample.INSTANCE.play(castSound());
+		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
+
+		MagicMissile missile = MagicMissile.boltFromChar(hero.sprite.parent, MagicMissile.MAGIC_MISSILE,
+				hero.sprite, aim.collisionPos, new Callback() {
+			@Override
+			public void call() {
+
+				Char ch = Actor.findChar(aim.collisionPos);
+				if (ch != null) {
+					affectTarget(lute, hero, ch);
+					maybeReverb(lute, hero, ch);
+				} else {
+					CellEmitter.get(aim.collisionPos).start(noteFactory(), 0.3f, 3);
+					GLog.i(Messages.get(TargetedSong.class, "no_target"));
+				}
+
+				hero.spend(1f);
+				hero.next();
+
+				onSongCast(lute, hero);
+
+			}
+		});
+		//the missile is made of the song's notes, rather than its usual particles
+		missile.pour(noteFactory(), 0.03f);
+	}
 
 	//applies the song's effect to a character. Used for the primary target and reverb echoes
 	protected abstract void affectTarget(Lute lute, Hero hero, Char ch);
@@ -83,7 +143,7 @@ public abstract class TargetedSong extends Song {
 
 			if (!candidates.isEmpty()) {
 				Char echo = Random.element(candidates);
-				echo.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 3);
+				echo.sprite.centerEmitter().start(noteFactory(), 0.3f, 3);
 				affectTarget(lute, hero, echo);
 			}
 		}

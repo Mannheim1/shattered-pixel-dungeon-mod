@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -59,7 +60,19 @@ public abstract class Song {
 	}
 
 	public String desc(){
-		return Messages.get(this, "desc") + "\n\n" + Messages.get(this, "charge_cost", (int)chargeUse(Dungeon.hero));
+		return Messages.get(this, "desc", descArgs())
+				+ "\n\n" + Messages.get(this, "charge_cost", (int)chargeUse(Dungeon.hero));
+	}
+
+	//the current values of a song's level-scaled stats, shown highlighted in its description
+	protected Object[] descArgs(){
+		return new Object[0];
+	}
+
+	//the effective lute level that song effects scale with
+	public static int luteLvl(){
+		Lute lute = Dungeon.hero != null ? Dungeon.hero.belongings.getItem(Lute.class) : null;
+		return lute == null ? 0 : lute.buffedLvl();
 	}
 
 	public int targetingFlags(){
@@ -68,6 +81,16 @@ public abstract class Song {
 
 	public int icon(){
 		return HeroIcon.NONE;
+	}
+
+	//the color this song's note particles are tinted with
+	public int noteColor(){
+		return 0xFFFFFF;
+	}
+
+	//the emitter factory for this song's note particles
+	public NoteParticle.Factory noteFactory(){
+		return new NoteParticle.Factory(noteColor());
 	}
 
 	//effects that trigger on every song cast

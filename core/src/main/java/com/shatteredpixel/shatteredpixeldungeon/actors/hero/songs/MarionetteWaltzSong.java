@@ -22,24 +22,24 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dancing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Marionette;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.audio.Sample;
+import com.watabou.noosa.particles.Emitter;
 
 public class MarionetteWaltzSong extends TargetedSong {
 
 	public static final MarionetteWaltzSong INSTANCE = new MarionetteWaltzSong();
+
+	public static final float BASE_DURATION = 5f;
+	//the song casts at +4 lute levels against a dancing target
+	public static final int DANCE_BONUS_LVLS = 4;
 
 	@Override
 	public int icon() {
@@ -47,42 +47,60 @@ public class MarionetteWaltzSong extends TargetedSong {
 	}
 
 	@Override
-	protected void onTargetSelected(Lute lute, Hero hero, Integer target) {
-		if (target == null) {
-			return;
-		}
+	protected String castSound() {
+		return Assets.Sounds.CHARMS;
+	}
 
-		Ballistica aim = new Ballistica(hero.pos, target, targetingFlags());
-		Char ch = Actor.findChar(aim.collisionPos);
+	@Override
+	public int noteColor() {
+		return 0x998F5C;
+	}
 
-		if (ch == hero) {
-			GLog.i(Messages.get(Wand.class, "self_target"));
-			return;
-		} else if (ch == null) {
-			GLog.w(Messages.get(this, "no_target"));
-			return;
-		}
-
-		QuickSlotButton.target(ch);
-
-		hero.sprite.operate(hero.pos);
-		Sample.INSTANCE.play(Assets.Sounds.CHARMS);
-		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-
-		affectTarget(lute, hero, ch);
-		maybeReverb(lute, hero, ch);
-
-		hero.spend(1f);
-		hero.next();
-
-		onSongCast(lute, hero);
+	public static float duration(int lvl) {
+		return BASE_DURATION + lvl;
 	}
 
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
+		//against a dancing target the waltz casts at bonus levels, consuming the dance
+		int lvl = lute.buffedLvl();
+		Dancing dance = ch.buff(Dancing.class);
+		if (dance != null) {
+			lvl += DANCE_BONUS_LVLS;
+			dance.detach();
+		}
+
 		//note that the marionette's duration is internal, so liquid cadenza doesn't affect it
-		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-		Buff.affect(ch, Marionette.class).reset();
+		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
+		ch.sprite.emitter().start(StringParticle.FACTORY, 0.2f, 4);
+		Buff.affect(ch, Marionette.class).set((int)duration(lvl));
+	}
+
+	//puppet strings: thin shafts that rise from the target and fade away
+	public static class StringParticle extends ShaftParticle {
+
+		public static final Emitter.Factory FACTORY = new Emitter.Factory() {
+			@Override
+			public void emit( Emitter emitter, int index, float x, float y ) {
+				((StringParticle)emitter.recycle( StringParticle.class )).reset( x, y );
+			}
+			@Override
+			public boolean lightMode() {
+				return true;
+			}
+		};
+
+		@Override
+		public void reset( float x, float y ) {
+			super.reset( x, y );
+			hardlight( INSTANCE.noteColor() );
+		}
+	}
+
+	@Override
+	protected Object[] descArgs() {
+		int lvl = luteLvl();
+		return new Object[]{ (int)duration(lvl), (int)duration(lvl + DANCE_BONUS_LVLS) };
 	}
 
 }

@@ -22,7 +22,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
@@ -30,22 +29,17 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Trance;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.audio.Sample;
 
 public class DiscordSong extends TargetedSong {
 
 	public static final DiscordSong INSTANCE = new DiscordSong();
 
-	public static final float BASE_DURATION    = 5f;
-	public static final float TRANCED_DURATION = 10f;
+	public static final float BASE_DURATION = 5f;
+	//the song casts at +4 lute levels against an entranced target
+	public static final int TRANCE_BONUS_LVLS = 4;
 
 	@Override
 	public int icon() {
@@ -53,49 +47,31 @@ public class DiscordSong extends TargetedSong {
 	}
 
 	@Override
-	protected void onTargetSelected(Lute lute, Hero hero, Integer target) {
-		if (target == null) {
-			return;
-		}
+	protected String castSound() {
+		return Assets.Sounds.CHALLENGE;
+	}
 
-		Ballistica aim = new Ballistica(hero.pos, target, targetingFlags());
-		Char ch = Actor.findChar(aim.collisionPos);
+	@Override
+	public int noteColor() {
+		return 0xFF4444;
+	}
 
-		if (ch == hero) {
-			GLog.i(Messages.get(Wand.class, "self_target"));
-			return;
-		} else if (ch == null) {
-			GLog.w(Messages.get(this, "no_target"));
-			return;
-		}
-
-		QuickSlotButton.target(ch);
-
-		hero.sprite.operate(hero.pos);
-		Sample.INSTANCE.play(Assets.Sounds.CHALLENGE);
-		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-
-		affectTarget(lute, hero, ch);
-		maybeReverb(lute, hero, ch);
-
-		hero.spend(1f);
-		hero.next();
-
-		onSongCast(lute, hero);
+	public static float duration(int lvl) {
+		return BASE_DURATION + lvl;
 	}
 
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
-		//discord lasts longer against entranced targets, consuming the trance
-		float duration = BASE_DURATION;
+		//against an entranced target the song casts at bonus levels, consuming the trance
+		int lvl = lute.buffedLvl();
 		Trance trance = ch.buff(Trance.class);
 		if (trance != null) {
-			duration = TRANCED_DURATION;
+			lvl += TRANCE_BONUS_LVLS;
 			trance.detach();
 		}
-		duration = modifyDuration(duration);
+		float duration = modifyDuration(duration(lvl));
 
-		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
+		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 		Buff.prolong(ch, Amok.class, duration);
 		Buff.prolong(ch, BardAmokTracker.class, duration);
 
@@ -103,6 +79,12 @@ public class DiscordSong extends TargetedSong {
 		if (ch instanceof Mob && ((Mob) ch).state == ((Mob) ch).SLEEPING) {
 			((Mob) ch).state = ((Mob) ch).WANDERING;
 		}
+	}
+
+	@Override
+	protected Object[] descArgs() {
+		int lvl = luteLvl();
+		return new Object[]{ (int)duration(lvl), (int)duration(lvl + TRANCE_BONUS_LVLS) };
 	}
 
 	//invisible tracker so effects like grand finale can tell bard-sourced amok apart

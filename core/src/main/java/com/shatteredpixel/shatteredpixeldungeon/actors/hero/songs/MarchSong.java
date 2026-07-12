@@ -28,7 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Marching;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.audio.Sample;
@@ -42,14 +42,23 @@ public class MarchSong extends Song {
 		return HeroIcon.MARCH;
 	}
 
+	public static float duration(int lvl) {
+		return Marching.DURATION + 10*lvl;
+	}
+
+	@Override
+	public int noteColor() {
+		return 0x005826;
+	}
+
 	@Override
 	public void onCast(Lute lute, Hero hero) {
 
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.MASTERY);
-		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
+		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 
-		float duration = modifyDuration(Marching.DURATION);
+		float duration = modifyDuration(duration(lute.buffedLvl()));
 
 		Buff.prolong(hero, Marching.class, duration);
 
@@ -58,7 +67,7 @@ public class MarchSong extends Song {
 					&& ch.alignment == Char.Alignment.ALLY
 					&& Dungeon.level.heroFOV[ch.pos]) {
 				Buff.prolong(ch, Marching.class, duration);
-				ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 3);
+				ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 3);
 			}
 		}
 
@@ -66,6 +75,11 @@ public class MarchSong extends Song {
 		hero.next();
 
 		onSongCast(lute, hero);
+	}
+
+	@Override
+	protected Object[] descArgs() {
+		return new Object[]{ (int)duration(luteLvl()) };
 	}
 
 }

@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
@@ -42,6 +43,8 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBardSongs;
 import com.watabou.utils.Bundle;
@@ -261,12 +264,33 @@ public class Lute extends Artifact {
 		return levelKnown ? Math.round((buffedLvl()*10)/(float)levelCap): 0;
 	}
 
+	//a song the bard has set for quick casting, via the action indicator
+	private Song quickSong = null;
+
+	public void setQuickSong(Song song){
+		if (quickSong == song){
+			quickSong = null; //re-assigning the same song clears the quick song
+			if (passiveBuff != null){
+				ActionIndicator.clearAction((ActionIndicator.Action) passiveBuff);
+			}
+		} else {
+			quickSong = song;
+			if (passiveBuff != null){
+				ActionIndicator.setAction((ActionIndicator.Action) passiveBuff);
+			}
+		}
+	}
+
 	private static final String KNOWN_SONGS = "known_songs";
+	private static final String QUICK_CLS = "quick_cls";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(KNOWN_SONGS, knownSongs.toArray(new Class[0]));
+		if (quickSong != null) {
+			bundle.put(QUICK_CLS, quickSong.getClass());
+		}
 	}
 
 	@Override
@@ -276,6 +300,14 @@ public class Lute extends Artifact {
 			knownSongs.clear();
 			for (Class<?> cls : bundle.getClassArray(KNOWN_SONGS)){
 				knownSongs.add((Class<? extends Song>) cls);
+			}
+		}
+		if (bundle.contains(QUICK_CLS)){
+			Class quickCls = bundle.getClass(QUICK_CLS);
+			for (Song song : Song.getAllSongs()){
+				if (song.getClass() == quickCls){
+					quickSong = song;
+				}
 			}
 		}
 	}
@@ -304,7 +336,71 @@ public class Lute extends Artifact {
 		}
 	}
 
-	public class LuteRecharge extends ArtifactBuff {
+	public class LuteRecharge extends ArtifactBuff implements ActionIndicator.Action {
+
+		@Override
+		public boolean attachTo(Char target) {
+			if (super.attachTo(target)) {
+				if (quickSong != null) ActionIndicator.setAction(this);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public void detach() {
+			super.detach();
+			ActionIndicator.clearAction(this);
+		}
+
+		@Override
+		public String actionName() {
+			return quickSong.name();
+		}
+
+		@Override
+		public int actionIcon() {
+			return quickSong.icon();
+		}
+
+		@Override
+		public int indicatorColor() {
+			return 0x442266;
+		}
+
+		@Override
+		public void doAction() {
+			if (cursed){
+				GLog.w(Messages.get(Lute.this, "cursed"));
+				return;
+			}
+
+			if (!canPlay(Dungeon.hero, quickSong)){
+				GLog.w(Messages.get(Lute.this, "no_song"));
+				return;
+			}
+
+			if (QuickSlotButton.targetingSlot != -1 &&
+					Dungeon.quickslot.getItem(QuickSlotButton.targetingSlot) == Lute.this) {
+				targetingSong = quickSong;
+				int cell = QuickSlotButton.autoAim(QuickSlotButton.lastTarget, Lute.this);
+
+				if (cell != -1){
+					GameScene.handleCell(cell);
+				} else {
+					//couldn't auto-aim, just target the position and hope for the best.
+					GameScene.handleCell( QuickSlotButton.lastTarget.pos );
+				}
+			} else {
+				quickSong.onCast(Lute.this, Dungeon.hero);
+
+				if (quickSong.targetingFlags() != -1 && Dungeon.quickslot.contains(Lute.this)){
+					targetingSong = quickSong;
+					QuickSlotButton.useTargeting(Dungeon.quickslot.getSlot(Lute.this));
+				}
+			}
+		}
 
 		@Override
 		public boolean act() {

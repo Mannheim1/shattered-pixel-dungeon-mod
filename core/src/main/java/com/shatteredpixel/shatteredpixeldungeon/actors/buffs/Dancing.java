@@ -22,19 +22,38 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DanceSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.watabou.noosa.particles.Emitter;
+import com.watabou.utils.Bundle;
+import com.watabou.utils.Random;
 
 //applied by the bard's dance song. The target cannot move or make melee attacks,
 // but can still use ranged and magical attacks. It appears to dance in place.
+//physical attacks have a chance to break the dance, environmental damage never does
 public class Dancing extends FlavourBuff {
 
 	public static final float DURATION	= 10f;
 
+	private float breakChance = 0.5f;
+
 	{
 		type = buffType.NEGATIVE;
 		announced = true;
+	}
+
+	public void setBreakChance( float chance ){
+		breakChance = chance;
+	}
+
+	//called whenever the dancer takes damage. Only attacks from other characters
+	// can snap the target out of the dance, and only with a chance
+	public void processDamage( Object src ){
+		if (src instanceof Char && Random.Float() < breakChance){
+			detach();
+		}
 	}
 
 	@Override
@@ -73,20 +92,45 @@ public class Dancing extends FlavourBuff {
 		return Math.max(0, (DURATION - visualcooldown()) / DURATION);
 	}
 
+	private Emitter noteEmitter;
+
 	@Override
 	public void fx(boolean on) {
 		if (target.sprite != null) {
 			if (on) {
 				target.sprite.dance();
-			} else if (target.paralysed == 0) {
-				target.sprite.idle();
+				//notes continuously float off the dancer while the compulsion lasts
+				noteEmitter = target.sprite.centerEmitter();
+				noteEmitter.pour(DanceSong.INSTANCE.noteFactory(), 0.9f);
+			} else {
+				if (noteEmitter != null) {
+					noteEmitter.on = false;
+					noteEmitter = null;
+				}
+				if (target.paralysed == 0) {
+					target.sprite.idle();
+				}
 			}
 		}
 	}
 
+	private static final String BREAK_CHANCE = "break_chance";
+
+	@Override
+	public void storeInBundle(Bundle bundle) {
+		super.storeInBundle(bundle);
+		bundle.put(BREAK_CHANCE, breakChance);
+	}
+
+	@Override
+	public void restoreFromBundle(Bundle bundle) {
+		super.restoreFromBundle(bundle);
+		breakChance = bundle.getFloat(BREAK_CHANCE);
+	}
+
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", dispTurns());
+		return Messages.get(this, "desc", (int)(100*breakChance), dispTurns());
 	}
 
 }

@@ -34,7 +34,7 @@ import com.watabou.utils.Bundle;
 // and instead mirrors the hero's movements step for step.
 public class Marionette extends Buff {
 
-	public static final float DURATION	= 10f;
+	public static final float DURATION	= 5f;
 
 	private int left = (int)DURATION;
 	private int lastHeroPos = -1;
@@ -72,8 +72,8 @@ public class Marionette extends Buff {
 		}
 	}
 
-	public void reset() {
-		left = (int)DURATION;
+	public void set( int duration ) {
+		left = duration;
 	}
 
 	@Override

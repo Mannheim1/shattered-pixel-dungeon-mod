@@ -22,20 +22,13 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dancing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.audio.Sample;
 
 public class DanceSong extends TargetedSong {
 
@@ -47,41 +40,34 @@ public class DanceSong extends TargetedSong {
 	}
 
 	@Override
-	protected void onTargetSelected(Lute lute, Hero hero, Integer target) {
-		if (target == null) {
-			return;
-		}
+	public int noteColor() {
+		return 0x52ABFF;
+	}
 
-		Ballistica aim = new Ballistica(hero.pos, target, targetingFlags());
-		Char ch = Actor.findChar(aim.collisionPos);
+	@Override
+	protected String castSound() {
+		return Assets.Sounds.CHARMS;
+	}
 
-		if (ch == hero) {
-			GLog.i(Messages.get(Wand.class, "self_target"));
-			return;
-		} else if (ch == null) {
-			GLog.w(Messages.get(this, "no_target"));
-			return;
-		}
+	public static float duration(int lvl) {
+		return Dancing.DURATION + lvl;
+	}
 
-		QuickSlotButton.target(ch);
-
-		hero.sprite.operate(hero.pos);
-		Sample.INSTANCE.play(Assets.Sounds.CHARMS);
-		hero.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-
-		affectTarget(lute, hero, ch);
-		maybeReverb(lute, hero, ch);
-
-		hero.spend(1f);
-		hero.next();
-
-		onSongCast(lute, hero);
+	public static float breakChance(int lvl) {
+		return 0.50f - 0.025f*lvl;
 	}
 
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
-		ch.sprite.centerEmitter().start(Speck.factory(Speck.NOTE), 0.3f, 5);
-		Buff.prolong(ch, Dancing.class, modifyDuration(Dancing.DURATION));
+		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
+		int lvl = lute.buffedLvl();
+		Buff.prolong(ch, Dancing.class, modifyDuration(duration(lvl))).setBreakChance(breakChance(lvl));
+	}
+
+	@Override
+	protected Object[] descArgs() {
+		int lvl = luteLvl();
+		return new Object[]{ (int)duration(lvl), (int)(100*breakChance(lvl)) };
 	}
 
 }

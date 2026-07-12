@@ -475,7 +475,7 @@ public abstract class Char extends Actor {
 
 			//characters laid to rest by the bard's requiem deal reduced damage
 			if (buff( LaidToRest.class ) != null) {
-				dmg *= 0.75f;
+				dmg = buff( LaidToRest.class ).damageFactor(dmg);
 			}
 
 			if (buff( PowerOfMany.PowerBuff.class) != null){
@@ -932,9 +932,10 @@ public abstract class Char extends Actor {
 		if (this.buff(MagicalSleep.class) != null){
 			Buff.detach(this, MagicalSleep.class);
 		}
-		//taking damage snaps a character out of their dance
+		//attacks from other characters may snap a character out of their dance,
+		// environmental damage never does
 		if (this.buff(Dancing.class) != null){
-			Buff.detach(this, Dancing.class);
+			this.buff(Dancing.class).processDamage(src);
 		}
 		if (this.buff(Doom.class) != null && !isImmune(Doom.class)){
 			damage *= 1.67f;
