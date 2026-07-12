@@ -76,14 +76,18 @@ public abstract class Song {
 		lute.spendCharge(chargeUse(hero));
 		Talent.onArtifactUsed(hero);
 
-		//dinner show: the song takes no time. All songs spend 1 turn before this, so refund it
+		//dinner show: the lute is +1 level for a limited number of songs, this one included
 		Talent.DinnerShowTracker dinnerShow = hero.buff(Talent.DinnerShowTracker.class);
 		if (dinnerShow != null){
-			hero.spend(-1f);
 			dinnerShow.countDown(1);
 			if (dinnerShow.count() <= 0){
 				dinnerShow.detach();
 			}
+		}
+
+		//accented strike: playing a song accents the bard's next physical attack
+		if (hero.hasTalent(Talent.ACCENTED_STRIKE)){
+			Buff.affect(hero, Talent.AccentedStrikeTracker.class, 5f);
 		}
 
 		//liquid cadenza is consumed by playing a song

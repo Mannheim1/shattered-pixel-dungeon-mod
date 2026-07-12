@@ -218,7 +218,20 @@ public enum Talent {
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
 	public static class LethalMomentumTracker extends FlavourBuff{};
-	public static class DinnerShowTracker extends CounterBuff{{revivePersists = true;}};
+	public static class DinnerShowTracker extends CounterBuff{
+		{revivePersists = true;}
+		//the lute's displayed level changes while this is active
+		@Override
+		public void detach() {
+			super.detach();
+			Item.updateQuickslot();
+		}
+	};
+	public static class AccentedStrikeTracker extends FlavourBuff{
+		{ type = Buff.buffType.POSITIVE; }
+		public int icon() { return BuffIndicator.ACCENTED_STRIKE; }
+		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
+	};
 	public static class LiquidCadenzaTracker extends CounterBuff{{revivePersists = true;}};
 	public static class WhettedBladeTracker extends CounterBuff{{revivePersists = true;}};
 	public static class StrikingWaveTracker extends FlavourBuff{};
@@ -670,19 +683,26 @@ public enum Talent {
 			}
 		}
 		if (hero.hasTalent(DINNER_SHOW)){
-			//next 1/2 songs take no time
+			//the lute is +1 level for the next 1/2 songs
 			DinnerShowTracker tracker = Buff.affect(hero, DinnerShowTracker.class);
 			float songs = hero.pointsInTalent(DINNER_SHOW);
 			if (tracker.count() < songs){
 				tracker.countUp(songs - tracker.count());
 			}
+			Item.updateQuickslot();
 		}
 		if (hero.hasTalent(MUSICIANS_MEAL)){
-			Lute lute = hero.belongings.getItem(Lute.class);
-			if (lute != null){
-				//0.5/1 lute charges
-				lute.directCharge( 0.5f * hero.pointsInTalent(MUSICIANS_MEAL) );
-				ScrollOfRecharging.charge(hero);
+			if (hero.heroClass == HeroClass.BARD) {
+				Lute lute = hero.belongings.getItem(Lute.class);
+				if (lute != null) {
+					// 2/3 of a charge at +1, 1 full charge at +2
+					lute.directCharge( (1+hero.pointsInTalent(MUSICIANS_MEAL))/3f );
+					ScrollOfRecharging.charge(hero);
+				}
+			} else {
+				//2/3 turns of recharging, both kinds
+				wandChargeTurns += 1 + hero.pointsInTalent(MUSICIANS_MEAL);
+				artifactChargeTurns += 1 + hero.pointsInTalent(MUSICIANS_MEAL);
 			}
 		}
 
@@ -720,20 +740,20 @@ public enum Talent {
 			factor *= 1f + hero.pointsInTalent(VETERANS_INTUITION); //instant at +2 (see onItemEquipped)
 		}
 		// 3x/instant for Mage (see Wand.wandUsed())
-		// 2x for Bard, who also detects curses on pickup at +2 (see Item.doPickUp)
+		// 2x/3x for Bard
 		if (item instanceof Wand){
 			factor *= 1f + 2.0f*hero.pointsInTalent(SCHOLARS_INTUITION);
-			if (hero.pointsInTalent(PERFECT_PITCH) > 0) factor *= 2f;
+			factor *= 1f + hero.pointsInTalent(PERFECT_PITCH);
 		}
 		// 3x/instant speed with Huntress talent (see MissileWeapon.proc)
 		if (item instanceof MissileWeapon){
 			factor *= 1f + 2.0f*hero.pointsInTalent(SURVIVALISTS_INTUITION);
 		}
 		// 2x/instant for Rogue (see onItemEqupped), also id's type on equip/on pickup
-		// 2x for Bard as well
+		// 2x/3x for Bard as well
 		if (item instanceof Ring){
 			factor *= 1f + hero.pointsInTalent(THIEFS_INTUITION);
-			if (hero.pointsInTalent(PERFECT_PITCH) > 0) factor *= 2f;
+			factor *= 1f + hero.pointsInTalent(PERFECT_PITCH);
 		}
 		return factor;
 	}

@@ -428,11 +428,13 @@ public abstract class Char extends Actor {
 			//flat damage bonus is affected by multipliers
 			dmg += dmgBonus;
 
-			//accented strike: the bard's attacks land harder on song-affected enemies
+			//accented strike: after playing a song, the bard's next attack lands harder
+			// on song-affected enemies
 			if (this == Dungeon.hero
-					&& Dungeon.hero.hasTalent(Talent.ACCENTED_STRIKE)
-					&& GrandFinaleSong.bardicDebuffs(enemy) > 0){
-				dmg += 1 + Dungeon.hero.pointsInTalent(Talent.ACCENTED_STRIKE);
+					&& Dungeon.hero.buff(Talent.AccentedStrikeTracker.class) != null){
+				dmg += 2 * Dungeon.hero.pointsInTalent(Talent.ACCENTED_STRIKE)
+						* GrandFinaleSong.bardicDebuffs(enemy);
+				Dungeon.hero.buff(Talent.AccentedStrikeTracker.class).detach();
 			}
 
 			//whetted blade: the skald's attacks after a song deal bonus damage

@@ -149,6 +149,7 @@ public class BuffIndicator extends Component {
 	public static final int MARIONETTE      = MOD_OFFSET+5;
 	public static final int LAID_TO_REST    = MOD_OFFSET+6;
 	public static final int VERSES          = MOD_OFFSET+7;
+	public static final int ACCENTED_STRIKE = MOD_OFFSET+8;
 
 	public static final int SIZE_SMALL  = 7;
 	public static final int SIZE_LARGE  = 16;

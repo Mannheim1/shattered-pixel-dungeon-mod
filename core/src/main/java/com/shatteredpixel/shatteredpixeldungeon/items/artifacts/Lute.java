@@ -245,6 +245,22 @@ public class Lute extends Artifact {
 		return super.upgrade();
 	}
 
+	//dinner show: the lute is +1 level for a few songs after the bard eats.
+	// Song effects that scale with lute level should read buffedLvl(), not level()
+	@Override
+	public int buffedLvl() {
+		if (Dungeon.hero != null && Dungeon.hero.buff(Talent.DinnerShowTracker.class) != null
+				&& Dungeon.hero.belongings.contains(this)){
+			return level() + 1;
+		}
+		return level();
+	}
+
+	@Override
+	public int buffedVisiblyUpgraded() {
+		return levelKnown ? Math.round((buffedLvl()*10)/(float)levelCap): 0;
+	}
+
 	private static final String KNOWN_SONGS = "known_songs";
 
 	@Override
