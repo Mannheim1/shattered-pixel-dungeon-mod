@@ -61,8 +61,15 @@ public abstract class Song {
 	}
 
 	public String desc(){
-		return Messages.get(this, "desc", descArgs())
-				+ "\n\n" + Messages.get(this, "charge_cost", (int)chargeUse(Dungeon.hero));
+		String desc = Messages.get(this, "desc", descArgs());
+
+		//the maestro sees each song's finisher effect in its description
+		if (Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClass.MAESTRO){
+			desc += "\n\n" + Messages.get(Song.class, "finisher_header")
+					+ " " + Messages.get(this, "finisher_desc");
+		}
+
+		return desc + "\n\n" + Messages.get(this, "charge_cost", (int)chargeUse(Dungeon.hero));
 	}
 
 	//the current values of a song's level-scaled stats, shown highlighted in its description
@@ -77,10 +84,9 @@ public abstract class Song {
 	}
 
 	//whether the current song cast is empowered by a full maestro performance.
-	// Must be checked during effect application, before onSongCast consumes the performance.
-	// TODO MAESTRO FINISHERS: each song gets a bespoke finisher effect, applied in its
-	// onCast/affectTarget when this returns true. None are implemented yet — a full
-	// performance currently grants only the +6 effective lute levels.
+	// Each song applies its bespoke finisher effect in its onCast/affectTarget when this
+	// returns true. Must be checked during effect application, before onSongCast
+	// consumes the performance (see MarchSong for the one case where this needs care)
 	public static boolean maestroFinisher(){
 		Performing performing = Dungeon.hero != null ? Dungeon.hero.buff(Performing.class) : null;
 		return performing != null && performing.tier() == 3;

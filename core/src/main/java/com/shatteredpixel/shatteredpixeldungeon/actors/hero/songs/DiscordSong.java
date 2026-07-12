@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
@@ -74,6 +75,12 @@ public class DiscordSong extends TargetedSong {
 		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 		Buff.prolong(ch, Amok.class, duration);
 		Buff.prolong(ch, BardAmokTracker.class, duration);
+
+		//maestro finisher: the target is also pumped with adrenaline for the amok's
+		// duration, making it a far deadlier berserker (necromancer precedent)
+		if (maestroFinisher()){
+			Buff.prolong(ch, Adrenaline.class, duration);
+		}
 
 		//wake the target so it starts looking for something to attack
 		if (ch instanceof Mob && ((Mob) ch).state == ((Mob) ch).SLEEPING) {

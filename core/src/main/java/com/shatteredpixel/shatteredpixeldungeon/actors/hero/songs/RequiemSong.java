@@ -61,7 +61,9 @@ public class RequiemSong extends Song {
 			if (ch.alignment == Char.Alignment.ENEMY
 					&& Dungeon.level.heroFOV[ch.pos]
 					&& Dungeon.level.distance(hero.pos, ch.pos) <= RANGE
-					&& (Char.hasProp(ch, Char.Property.UNDEAD) || Char.hasProp(ch, Char.Property.DEMONIC))) {
+					&& (Char.hasProp(ch, Char.Property.UNDEAD) || Char.hasProp(ch, Char.Property.DEMONIC))
+					//bosses are immune to being laid to rest, don't waste a cast on them
+					&& !ch.isImmune(LaidToRest.class)) {
 				affected.add(ch);
 			}
 		}
@@ -76,7 +78,14 @@ public class RequiemSong extends Song {
 		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 
 		for (Char ch : affected) {
-			Buff.affect(ch, LaidToRest.class).set(lute.buffedLvl());
+			LaidToRest laid = Buff.affect(ch, LaidToRest.class);
+			laid.set(lute.buffedLvl());
+
+			//maestro finisher: the requiem executes the undead below one fifth health
+			if (maestroFinisher()){
+				laid.setExecute();
+			}
+
 			ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 3);
 		}
 

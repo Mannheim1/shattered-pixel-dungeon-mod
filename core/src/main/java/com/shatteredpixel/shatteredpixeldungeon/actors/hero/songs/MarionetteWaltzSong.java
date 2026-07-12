@@ -73,7 +73,13 @@ public class MarionetteWaltzSong extends TargetedSong {
 		//note that the marionette's duration is internal, so liquid cadenza doesn't affect it
 		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 		ch.sprite.emitter().start(StringParticle.FACTORY, 0.2f, 4);
-		Buff.affect(ch, Marionette.class).set((int)duration(lvl));
+		Marionette marionette = Buff.affect(ch, Marionette.class);
+		marionette.set((int)duration(lvl));
+
+		//maestro finisher: the puppet also mirrors the hero's attacks
+		if (maestroFinisher()){
+			marionette.setMirrorAttacks();
+		}
 	}
 
 	//puppet strings: thin shafts that rise from the target and fade away

@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Silenced;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -47,10 +48,17 @@ public class NocturneSong extends TargetedSong {
 		return Silenced.DURATION + lvl;
 	}
 
+	//maestro finisher: the target is also briefly blinded
+	public static final float FINISHER_BLIND = 5f;
+
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
 		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 		Buff.prolong(ch, Silenced.class, modifyDuration(duration(lute.buffedLvl())));
+
+		if (maestroFinisher()){
+			Buff.prolong(ch, Blindness.class, FINISHER_BLIND);
+		}
 	}
 
 	@Override

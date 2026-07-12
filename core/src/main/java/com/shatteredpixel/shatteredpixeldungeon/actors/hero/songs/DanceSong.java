@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dancing;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
@@ -57,11 +58,18 @@ public class DanceSong extends TargetedSong {
 		return 0.50f - 0.025f*lvl;
 	}
 
+	//maestro finisher: the target is also briefly vulnerable
+	public static final float FINISHER_VULNERABLE = 5f;
+
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
 		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 		int lvl = lute.buffedLvl();
 		Buff.prolong(ch, Dancing.class, modifyDuration(duration(lvl))).setBreakChance(breakChance(lvl));
+
+		if (maestroFinisher()){
+			Buff.prolong(ch, Vulnerable.class, FINISHER_VULNERABLE);
+		}
 	}
 
 	@Override

@@ -29,11 +29,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -64,6 +67,9 @@ public class StokeFlameSong extends Song {
 	public static int radius(int lvl) {
 		return 4 + 2*lvl/5;
 	}
+
+	//maestro finisher: fire imbue duration
+	public static final float FINISHER_IMBUE = 10f;
 
 	//the burst against burning enemies scales linearly, to about 2x its base value at lute level 10
 	public static int min(int lvl) {
@@ -107,6 +113,22 @@ public class StokeFlameSong extends Song {
 		Sample.INSTANCE.play(Assets.Sounds.BURNING);
 		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 		hero.sprite.centerEmitter().burst(FLARE, 30);
+
+		//maestro finisher: the bard is imbued with fire, and the heat boils away
+		// standing water before the flames catch
+		if (maestroFinisher()){
+			Buff.affect(hero, FireImbue.class).set(FINISHER_IMBUE);
+			for (int i = 0; i < Dungeon.level.length(); i++) {
+				if (Dungeon.level.map[i] == Terrain.WATER
+						&& Dungeon.level.distance(hero.pos, i) <= radius(lvl)) {
+					Level.set(i, Terrain.EMPTY);
+					GameScene.updateMap(i);
+					if (Dungeon.level.heroFOV[i]) {
+						CellEmitter.get(i).burst(Speck.factory(Speck.STEAM), 3);
+					}
+				}
+			}
+		}
 
 		//reignite embers into open flame
 		for (int cell : embers) {

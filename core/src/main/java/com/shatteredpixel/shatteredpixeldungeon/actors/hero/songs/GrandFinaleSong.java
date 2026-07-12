@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dancing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LaidToRest;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Marionette;
@@ -85,6 +86,7 @@ public class GrandFinaleSong extends Song {
 		hero.sprite.centerEmitter().start(noteFactory(), 0.2f, 8);
 
 		int lvl = lute.buffedLvl();
+		boolean finisher = maestroFinisher();
 		for (Char ch : Actor.chars()) {
 			if (ch.alignment == Char.Alignment.ENEMY
 					&& Dungeon.level.heroFOV[ch.pos]
@@ -94,6 +96,11 @@ public class GrandFinaleSong extends Song {
 					ch.sprite.centerEmitter().start(noteFactory(), 0.2f, 5);
 					ch.sprite.burst(0xFFFFFF44, 5);
 					ch.damage(modifyDamage(Random.NormalIntRange(min(lvl) * debuffs, max(lvl) * debuffs)), this);
+
+					//maestro finisher: the reprise renews every debuff the finale counted
+					if (finisher && ch.isAlive()) {
+						refreshBardicDebuffs(ch, lvl, hero);
+					}
 				}
 			}
 		}
@@ -108,6 +115,35 @@ public class GrandFinaleSong extends Song {
 	protected Object[] descArgs() {
 		int lvl = luteLvl();
 		return new Object[]{ min(lvl), max(lvl) };
+	}
+
+	//maestro finisher: re-extends each counted debuff to the duration a fresh cast would give
+	private static void refreshBardicDebuffs( Char ch, int lvl, Hero hero ) {
+		if (ch.buff(Trance.class) != null){
+			Buff.prolong(ch, Trance.class, TranceSong.duration(lvl));
+		}
+		if (ch.buff(Dancing.class) != null){
+			Buff.prolong(ch, Dancing.class, DanceSong.duration(lvl)).setBreakChance(DanceSong.breakChance(lvl));
+		}
+		if (ch.buff(Marionette.class) != null){
+			ch.buff(Marionette.class).set((int)MarionetteWaltzSong.duration(lvl));
+		}
+		if (ch.buff(Silenced.class) != null){
+			Buff.prolong(ch, Silenced.class, NocturneSong.duration(lvl));
+		}
+		if (ch.buff(LaidToRest.class) != null){
+			ch.buff(LaidToRest.class).refresh();
+		}
+		if (ch.buff(Terror.class) != null && ch.buff(DirgeSong.BardTerrorTracker.class) != null){
+			float duration = DirgeSong.duration(lvl);
+			Buff.prolong(ch, Terror.class, duration).object = hero.id();
+			Buff.prolong(ch, DirgeSong.BardTerrorTracker.class, duration);
+		}
+		if (ch.buff(Amok.class) != null && ch.buff(DiscordSong.BardAmokTracker.class) != null){
+			float duration = DiscordSong.duration(lvl);
+			Buff.prolong(ch, Amok.class, duration);
+			Buff.prolong(ch, DiscordSong.BardAmokTracker.class, duration);
+		}
 	}
 
 	//counts all debuffs on a character which were applied by the bard's songs

@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Trance;
@@ -71,6 +72,14 @@ public class DirgeSong extends TargetedSong {
 		float duration = modifyDuration(duration(lvl));
 
 		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
+
+		//maestro finisher: the target is stricken with dread and flees the dungeon
+		// entirely. Dread-immune enemies (minibosses etc.) get the regular terror instead
+		if (maestroFinisher() && !ch.isImmune(Dread.class)){
+			Buff.affect(ch, Dread.class).object = hero.id();
+			return;
+		}
+
 		Buff.prolong(ch, Terror.class, duration).object = hero.id();
 		Buff.prolong(ch, BardTerrorTracker.class, duration);
 	}

@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Marching;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
@@ -51,8 +52,15 @@ public class MarchSong extends Song {
 		return 0x005826;
 	}
 
+	//maestro finisher: the bard is also briefly invisible
+	public static final float FINISHER_INVIS = 5f;
+
 	@Override
 	public void onCast(Lute lute, Hero hero) {
+
+		//captured up front: onSongCast consumes the performance, and its
+		// Invisibility.dispel() would remove an invisibility applied before it
+		boolean finisher = maestroFinisher();
 
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.MASTERY);
@@ -75,6 +83,10 @@ public class MarchSong extends Song {
 		hero.next();
 
 		onSongCast(lute, hero);
+
+		if (finisher){
+			Buff.affect(hero, Invisibility.class, FINISHER_INVIS);
+		}
 	}
 
 	@Override

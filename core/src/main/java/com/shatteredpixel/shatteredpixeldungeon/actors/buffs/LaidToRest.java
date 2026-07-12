@@ -45,6 +45,18 @@ public class LaidToRest extends Buff {
 		luteLvl = lvl;
 	}
 
+	//re-extends the buff without changing its power, used by grand finale's reprise
+	public void refresh() {
+		left = (int)DURATION;
+	}
+
+	//maestro finisher: the requiem claims the undead once they are weak enough
+	private boolean execute = false;
+
+	public void setExecute() {
+		execute = true;
+	}
+
 	public static int minDmg( int lvl ) {
 		return 2 + lvl/4;
 	}
@@ -71,6 +83,12 @@ public class LaidToRest extends Buff {
 			return true;
 		}
 
+		//executing requiem: the target dies outright below one fifth of its max health
+		if (execute && target.HP <= target.HT/5) {
+			target.die(this);
+			return true;
+		}
+
 		left--;
 		if (left <= 0) {
 			detach();
@@ -83,12 +101,14 @@ public class LaidToRest extends Buff {
 
 	private static final String LEFT = "left";
 	private static final String LUTE_LVL = "lute_lvl";
+	private static final String EXECUTE = "execute";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(LEFT, left);
 		bundle.put(LUTE_LVL, luteLvl);
+		bundle.put(EXECUTE, execute);
 	}
 
 	@Override
@@ -96,6 +116,7 @@ public class LaidToRest extends Buff {
 		super.restoreFromBundle(bundle);
 		left = bundle.getInt(LEFT);
 		luteLvl = bundle.getInt(LUTE_LVL);
+		execute = bundle.getBoolean(EXECUTE);
 	}
 
 	@Override
@@ -105,7 +126,11 @@ public class LaidToRest extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", (int)(100 * (1f - dealtDamageFactor(luteLvl))), left);
+		String desc = Messages.get(this, "desc", (int)(100 * (1f - dealtDamageFactor(luteLvl))), left);
+		if (execute){
+			desc += "\n\n" + Messages.get(this, "execute_desc");
+		}
+		return desc;
 	}
 
 }

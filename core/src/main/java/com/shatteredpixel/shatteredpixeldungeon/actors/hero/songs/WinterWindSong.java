@@ -39,11 +39,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -71,6 +73,10 @@ public class WinterWindSong extends Song {
 	public static float chillDuration(int lvl) {
 		return 5 + lvl/2f;
 	}
+
+	//maestro finisher: frost imbue duration and blizzard volume
+	public static final float FINISHER_IMBUE = 10f;
+	public static final int FINISHER_BLIZZARD = 300;
 
 	//gas-like blobs which the wind can push around
 	private static final Class<?>[] PUSHABLE_GASES = new Class<?>[]{
@@ -153,6 +159,13 @@ public class WinterWindSong extends Song {
 					Buff.affect(ch, Chill.class, chillDuration(lvl));
 				}
 			}
+		}
+
+		//maestro finisher: the bard is imbued with frost and a blizzard springs up
+		// around him. Seeded after the push phase, so this cast doesn't move it
+		if (maestroFinisher()){
+			Buff.affect(hero, FrostImbue.class, FINISHER_IMBUE);
+			GameScene.add(Blob.seed(hero.pos, FINISHER_BLIZZARD, Blizzard.class));
 		}
 
 		hero.spend(1f);

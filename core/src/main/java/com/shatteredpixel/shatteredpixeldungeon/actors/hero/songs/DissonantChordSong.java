@@ -26,7 +26,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
@@ -70,6 +72,31 @@ public class DissonantChordSong extends TargetedSong {
 			QuickSlotButton.target(Actor.findChar(aim.collisionPos));
 		} else {
 			QuickSlotButton.target(Actor.findChar(target));
+		}
+
+		//maestro finisher: the chord becomes a penetrating beam, striking every
+		// enemy in its path and stopping only at solid terrain
+		if (maestroFinisher()){
+			Ballistica beam = new Ballistica(hero.pos, target, Ballistica.STOP_SOLID);
+
+			hero.busy();
+			Sample.INSTANCE.play(Assets.Sounds.RAY);
+			hero.sprite.zap(beam.collisionPos);
+			hero.sprite.parent.add(new Beam.DeathRay(hero.sprite.center(),
+					DungeonTilemap.raisedTileCenterToWorld(beam.collisionPos)));
+
+			for (int cell : beam.subPath(1, beam.dist)) {
+				Char ch = Actor.findChar(cell);
+				if (ch != null) {
+					affectTarget(lute, hero, ch);
+				}
+			}
+
+			hero.spend(1f);
+			hero.next();
+
+			onSongCast(lute, hero);
+			return;
 		}
 
 		hero.busy();

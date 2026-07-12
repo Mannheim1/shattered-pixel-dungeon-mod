@@ -55,7 +55,13 @@ public class DrumbeatSong extends Song {
 		Sample.INSTANCE.play(Assets.Sounds.HIT_CRUSH, 1f, 0.8f);
 		hero.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 
-		Buff.prolong(hero, Drumbeat.class, modifyDuration(Drumbeat.DURATION)).addBeat(dmgPerBeat(lute.buffedLvl()));
+		//maestro finisher: the song grants three beats instead of one, converting a
+		// long performance into an instant war-rhythm
+		int beats = maestroFinisher() ? 3 : 1;
+		Drumbeat drumbeat = Buff.prolong(hero, Drumbeat.class, modifyDuration(Drumbeat.DURATION));
+		for (int i = 0; i < beats; i++){
+			drumbeat.addBeat(dmgPerBeat(lute.buffedLvl()));
+		}
 
 		hero.spend(1f);
 		hero.next();

@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Trance;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
@@ -47,10 +48,17 @@ public class TranceSong extends TargetedSong {
 		return Trance.DURATION + lvl;
 	}
 
+	//maestro finisher: the target is also briefly paralyzed
+	public static final float FINISHER_PARALYSIS = 3f;
+
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
 		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
 		Buff.prolong(ch, Trance.class, modifyDuration(duration(lute.buffedLvl())));
+
+		if (maestroFinisher()){
+			Buff.prolong(ch, Paralysis.class, FINISHER_PARALYSIS);
+		}
 	}
 
 	@Override

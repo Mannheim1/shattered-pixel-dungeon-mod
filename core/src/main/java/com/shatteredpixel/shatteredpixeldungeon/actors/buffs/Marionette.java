@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.MarionetteWaltzSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -76,6 +77,32 @@ public class Marionette extends Buff {
 		left = duration;
 	}
 
+	//maestro finisher: the puppet also echoes the hero's attacks
+	private boolean mirrorAttacks = false;
+
+	public void setMirrorAttacks() {
+		mirrorAttacks = true;
+	}
+
+	//called after the hero lands an attack. Every mirroring marionette that can reach
+	// the hero's target attacks it too
+	public static void mirrorAttack( Char enemy ) {
+		if (enemy == null || !enemy.isAlive()) return;
+
+		for (Char ch : Actor.chars().toArray(new Char[0])) {
+			Marionette marionette = ch.buff(Marionette.class);
+			if (marionette != null && marionette.mirrorAttacks
+					&& ch != enemy && ch.isAlive()
+					&& ch instanceof Mob && ((Mob) ch).canAttack(enemy)) {
+				ch.sprite.emitter().start(MarionetteWaltzSong.StringParticle.FACTORY, 0.2f, 2);
+				ch.attack(enemy);
+				if (!enemy.isAlive()) {
+					return;
+				}
+			}
+		}
+	}
+
 	@Override
 	public boolean act() {
 
@@ -122,12 +149,14 @@ public class Marionette extends Buff {
 
 	private static final String LEFT            = "left";
 	private static final String LAST_HERO_POS   = "last_hero_pos";
+	private static final String MIRROR_ATTACKS  = "mirror_attacks";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(LEFT, left);
 		bundle.put(LAST_HERO_POS, lastHeroPos);
+		bundle.put(MIRROR_ATTACKS, mirrorAttacks);
 	}
 
 	@Override
@@ -135,6 +164,7 @@ public class Marionette extends Buff {
 		super.restoreFromBundle(bundle);
 		left = bundle.getInt(LEFT);
 		lastHeroPos = bundle.getInt(LAST_HERO_POS);
+		mirrorAttacks = bundle.getBoolean(MIRROR_ATTACKS);
 	}
 
 	@Override
