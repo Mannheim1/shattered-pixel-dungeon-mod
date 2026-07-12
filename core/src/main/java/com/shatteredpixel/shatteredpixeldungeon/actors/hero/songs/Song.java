@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Performing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Verses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
@@ -75,6 +76,16 @@ public abstract class Song {
 		return lute == null ? 0 : lute.buffedLvl();
 	}
 
+	//whether the current song cast is empowered by a full maestro performance.
+	// Must be checked during effect application, before onSongCast consumes the performance.
+	// TODO MAESTRO FINISHERS: each song gets a bespoke finisher effect, applied in its
+	// onCast/affectTarget when this returns true. None are implemented yet — a full
+	// performance currently grants only the +6 effective lute levels.
+	public static boolean maestroFinisher(){
+		Performing performing = Dungeon.hero != null ? Dungeon.hero.buff(Performing.class) : null;
+		return performing != null && performing.tier() == 3;
+	}
+
 	public int targetingFlags(){
 		return -1; //-1 for no targeting
 	}
@@ -95,6 +106,14 @@ public abstract class Song {
 
 	//effects that trigger on every song cast
 	public void onSongCast(Lute lute, Hero hero){
+
+		//the maestro's performance is spent by playing a song. This must happen before
+		// Talent.onArtifactUsed below, which treats other artifact uses as interruptions
+		Performing performing = hero.buff(Performing.class);
+		if (performing != null){
+			performing.consume(this);
+		}
+
 		Invisibility.dispel();
 		lute.spendCharge(chargeUse(hero));
 		Talent.onArtifactUsed(hero);

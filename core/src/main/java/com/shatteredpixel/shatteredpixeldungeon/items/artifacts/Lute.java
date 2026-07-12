@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Performing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -248,15 +249,23 @@ public class Lute extends Artifact {
 		return super.upgrade();
 	}
 
-	//dinner show: the lute is +1 level for a few songs after the bard eats.
-	// Song effects that scale with lute level should read buffedLvl(), not level()
+	//temporary boosts to the lute's effective level. Song effects that scale with lute
+	// level should read buffedLvl(), not level()
 	@Override
 	public int buffedLvl() {
-		if (Dungeon.hero != null && Dungeon.hero.buff(Talent.DinnerShowTracker.class) != null
-				&& Dungeon.hero.belongings.contains(this)){
-			return level() + 1;
+		int lvl = level();
+		if (Dungeon.hero != null && Dungeon.hero.belongings.contains(this)){
+			//dinner show: the lute is +1 level for a few songs after the bard eats
+			if (Dungeon.hero.buff(Talent.DinnerShowTracker.class) != null){
+				lvl++;
+			}
+			//the maestro's performance: songs play at +2 levels per performance tier
+			Performing performing = Dungeon.hero.buff(Performing.class);
+			if (performing != null){
+				lvl += performing.levelBonus();
+			}
 		}
-		return level();
+		return lvl;
 	}
 
 	@Override

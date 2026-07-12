@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LostInventory;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Performing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PhysicalEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
@@ -206,6 +207,8 @@ public enum Talent {
 	TRAVELING_MUSICIAN(1010, 3), ENCORE(1009, 3),
 	//Skald T3
 	WHETTED_BLADE(1011, 3), EXTENDED_BALLAD(1012, 3), ROUSING_VERSE(1013, 3),
+	//Maestro T3 (placeholder icons, reusing the assassin's T3 art. Maestro art TBD)
+	ACCELERANDO(75, 3), THE_SHOW_MUST_GO_ON(76, 3), FERMATA(77, 3),
 
 	//universal T4
 	HEROIC_ENERGY(26, 4), //See icon() and title() for special logic for this one
@@ -608,6 +611,7 @@ public enum Talent {
 	public static class NatureBerriesDropped extends CounterBuff{{revivePersists = true;}};
 
 	public static void onFoodEaten( Hero hero, float foodVal, Item foodSource ){
+		Performing.interrupt(Performing.Interrupt.ITEM);
 		if (hero.hasTalent(HEARTY_MEAL)){
 			//4/6 HP healed, when hero is below 33% health (with a little rounding up)
 			if (hero.HP/(float)hero.HT < 0.334f) {
@@ -759,6 +763,7 @@ public enum Talent {
 	}
 
 	public static void onPotionUsed( Hero hero, int cell, float factor ){
+		Performing.interrupt(Performing.Interrupt.POTION_OR_SCROLL);
 		if (hero.hasTalent(LIQUID_CADENZA)){
 			//the next song's effect lasts 25/50% longer
 			Buff.affect(hero, LiquidCadenzaTracker.class);
@@ -814,6 +819,7 @@ public enum Talent {
 	}
 
 	public static void onScrollUsed( Hero hero, int pos, float factor, Class<?extends Item> cls ){
+		Performing.interrupt(Performing.Interrupt.POTION_OR_SCROLL);
 		if (hero.hasTalent(INSCRIBED_POWER)){
 			// 2/3 empowered wand zaps
 			Buff.affect(hero, ScrollEmpower.class).reset((int) (factor * (1 + hero.pointsInTalent(INSCRIBED_POWER))));
@@ -837,6 +843,7 @@ public enum Talent {
 	}
 
 	public static void onRunestoneUsed( Hero hero, int pos, Class<?extends Item> cls ){
+		Performing.interrupt(Performing.Interrupt.ITEM);
 		if (hero.hasTalent(RECALL_INSCRIPTION) && Runestone.class.isAssignableFrom(cls)){
 			if (hero.heroClass == HeroClass.CLERIC){
 				Buff.prolong(hero, RecallInscription.UsedItemTracker.class, hero.pointsInTalent(RECALL_INSCRIPTION) == 2 ? 300 : 10).item = cls;
@@ -856,6 +863,9 @@ public enum Talent {
 	}
 
 	public static void onArtifactUsed( Hero hero ){
+		//songs are not interruptions: by the time a song cast reaches this method,
+		// Song.onSongCast has already consumed the performance, making this a no-op
+		Performing.interrupt(Performing.Interrupt.ITEM);
 		if (hero.hasTalent(ENHANCED_RINGS)){
 			Buff.prolong(hero, EnhancedRings.class, 3f*hero.pointsInTalent(ENHANCED_RINGS));
 		}
@@ -884,6 +894,7 @@ public enum Talent {
 	}
 
 	public static void onItemEquipped( Hero hero, Item item ){
+		Performing.interrupt(Performing.Interrupt.ITEM);
 		boolean identify = false;
 		if (hero.pointsInTalent(VETERANS_INTUITION) == 2 && item instanceof Armor){
 			identify = true;
@@ -1181,6 +1192,9 @@ public enum Talent {
 				break;
 			case SKALD:
 				Collections.addAll(tierTalents, WHETTED_BLADE, EXTENDED_BALLAD, ROUSING_VERSE);
+				break;
+			case MAESTRO:
+				Collections.addAll(tierTalents, ACCELERANDO, THE_SHOW_MUST_GO_ON, FERMATA);
 				break;
 		}
 		for (Talent talent : tierTalents){

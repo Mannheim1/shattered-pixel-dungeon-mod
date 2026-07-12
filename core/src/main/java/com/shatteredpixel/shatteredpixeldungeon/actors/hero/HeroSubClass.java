@@ -50,7 +50,9 @@ public enum HeroSubClass {
 	PRIEST(HeroIcon.PRIEST),
 	PALADIN(HeroIcon.PALADIN),
 
-	SKALD(HeroIcon.SKALD);
+	SKALD(HeroIcon.SKALD),
+	//placeholder icon: reuses the gladiator's, maestro art TBD
+	MAESTRO(HeroIcon.GLADIATOR);
 
 	int icon;
 
