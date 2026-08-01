@@ -476,7 +476,7 @@ public abstract class Mob extends Char {
 		return false;
 	}
 	
-	protected boolean canAttack( Char enemy ) {
+	public boolean canAttack( Char enemy ) {
 		//dancing characters can't make melee attacks
 		// ranged attacks are handled by subclass overrides, which this doesn't block
 		if (buff(Dancing.class) != null){

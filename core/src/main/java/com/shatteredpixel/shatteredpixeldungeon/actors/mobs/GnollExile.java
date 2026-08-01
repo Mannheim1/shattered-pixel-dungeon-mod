@@ -71,7 +71,7 @@ public class GnollExile extends Gnoll {
 	}
 
 	@Override
-	protected boolean canAttack( Char enemy ) {
+	public boolean canAttack( Char enemy ) {
 		if (Dungeon.level.adjacent( pos, enemy.pos )){
 			return true;
 		}
