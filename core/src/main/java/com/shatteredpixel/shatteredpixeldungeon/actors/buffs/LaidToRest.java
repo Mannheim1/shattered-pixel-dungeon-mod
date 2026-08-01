@@ -126,7 +126,8 @@ public class LaidToRest extends Buff {
 
 	@Override
 	public String desc() {
-		String desc = Messages.get(this, "desc", (int)(100 * (1f - dealtDamageFactor(luteLvl))), left);
+		String desc = Messages.get(this, "desc", minDmg(luteLvl), maxDmg(luteLvl),
+				(int)(100 * (1f - dealtDamageFactor(luteLvl))), left);
 		if (execute){
 			desc += "\n\n" + Messages.get(this, "execute_desc");
 		}
