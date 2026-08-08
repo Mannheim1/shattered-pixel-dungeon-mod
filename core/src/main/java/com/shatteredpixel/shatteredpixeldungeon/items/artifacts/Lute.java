@@ -159,9 +159,11 @@ public class Lute extends Artifact {
 
 	public ArrayList<Song> knownSongs(){
 		ArrayList<Song> songs = new ArrayList<>();
-		for (Song song : Song.getAllSongs()){
-			if (knownSongs.contains(song.getClass())){
-				songs.add(song);
+		for (Class<? extends Song> cls : knownSongs){
+			for (Song song : Song.getAllSongs()){
+				if (song.getClass() == cls){
+					songs.add(song);
+				}
 			}
 		}
 		return songs;
