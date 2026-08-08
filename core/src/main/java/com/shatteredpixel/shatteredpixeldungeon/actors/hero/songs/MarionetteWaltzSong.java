@@ -30,7 +30,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.watabou.glwrap.Blending;
+import com.watabou.noosa.PseudoPixel;
 import com.watabou.noosa.particles.Emitter;
 
 public class MarionetteWaltzSong extends TargetedSong {
@@ -72,13 +75,48 @@ public class MarionetteWaltzSong extends TargetedSong {
 
 		//note that the marionette's duration is internal, so liquid cadenza doesn't affect it
 		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
-		ch.sprite.emitter().start(StringParticle.FACTORY, 0.2f, 4);
 		Marionette marionette = Buff.affect(ch, Marionette.class);
 		marionette.set((int)duration(lvl));
 
 		//maestro finisher: the puppet also mirrors the hero's attacks
 		if (maestroFinisher()){
 			marionette.setMirrorAttacks();
+		}
+	}
+
+	//a single puppet string of light that hangs from above the marionette's head
+	// for as long as the debuff lasts
+	public static class PuppetString extends PseudoPixel {
+
+		private static final float WIDTH    = 2;
+		private static final float HEIGHT   = 24;
+		//how far the string's lower end reaches down past the top of the target's sprite
+		private static final float OVERLAP  = 2;
+
+		private CharSprite target;
+
+		public PuppetString( CharSprite target ) {
+			super();
+			this.target = target;
+			hardlight( INSTANCE.noteColor() );
+			size( WIDTH, HEIGHT );
+			am = 0.5f;
+		}
+
+		@Override
+		public void update() {
+			super.update();
+
+			visible = target.visible;
+			x = target.center().x - WIDTH / 2f;
+			y = target.y + OVERLAP - HEIGHT;
+		}
+
+		@Override
+		public void draw() {
+			Blending.setLightMode();
+			super.draw();
+			Blending.setNormalMode();
 		}
 	}
 

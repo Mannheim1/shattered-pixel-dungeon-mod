@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TorchHalo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DanceSong;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.MarionetteWaltzSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.TranceSong;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
@@ -87,7 +88,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected float shadowOffset    = 0.25f;
 
 	public enum State {
-		BURNING, LEVITATING, INVISIBLE, PARALYSED, FROZEN, ILLUMINATED, CHILLED, DARKENED, MARKED, HEALING, SHIELDED, HEARTS, GLOWING, AURA, DANCING, TRANCED
+		BURNING, LEVITATING, INVISIBLE, PARALYSED, FROZEN, ILLUMINATED, CHILLED, DARKENED, MARKED, HEALING, SHIELDED, HEARTS, GLOWING, AURA, DANCING, TRANCED, MARIONETTE
 	}
 	
 	protected Animation idle;
@@ -109,6 +110,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected Emitter hearts;
 	protected Emitter dancing;
 	protected Emitter tranced;
+	protected MarionetteWaltzSong.PuppetString puppetString;
 	
 	protected IceBlock iceBlock;
 	protected DarkBlock darkBlock;
@@ -469,6 +471,10 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				tranced = centerEmitter();
 				tranced.pour(new NoteParticle.Factory(TranceSong.INSTANCE.noteColor(), NoteParticle.Motion.ORBIT), 0.33f);
 				break;
+			case MARIONETTE:
+				if (puppetString != null) puppetString.killAndErase();
+				GameScene.effect(puppetString = new MarionetteWaltzSong.PuppetString(this));
+				break;
 			case AURA:
 				if (aura != null)   aura.killAndErase();
 				float size = Math.max(width(), height());
@@ -590,6 +596,12 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				if (tranced != null) {
 					tranced.on = false;
 					tranced = null;
+				}
+				break;
+			case MARIONETTE:
+				if (puppetString != null) {
+					puppetString.killAndErase();
+					puppetString = null;
 				}
 				break;
 			case AURA:

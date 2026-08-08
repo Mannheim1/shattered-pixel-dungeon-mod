@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.MarionetteWaltzSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
 
@@ -170,6 +171,12 @@ public class Marionette extends Buff {
 	@Override
 	public int icon() {
 		return BuffIndicator.MARIONETTE;
+	}
+
+	@Override
+	public void fx(boolean on) {
+		if (on) target.sprite.add(CharSprite.State.MARIONETTE);
+		else target.sprite.remove(CharSprite.State.MARIONETTE);
 	}
 
 	@Override
