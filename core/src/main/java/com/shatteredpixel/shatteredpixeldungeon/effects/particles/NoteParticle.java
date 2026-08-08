@@ -41,7 +41,8 @@ public class NoteParticle extends Image {
 	public enum Motion {
 		DRIFT,  //drifts gently upward while swaying, like the stock note speck
 		SWING,  //swings side to side in place, used by the dancing debuff
-		ORBIT   //circles counterclockwise around its spawn point, used by the trance debuff
+		ORBIT,  //circles counterclockwise around its spawn point, used by the trance debuff
+		BURST   //flies outward in a random direction, used for striking effects
 	}
 
 	private static final float SWING_AMP    = 5f;   //pixels of horizontal swing
@@ -103,9 +104,14 @@ public class NoteParticle extends Image {
 				anchorY = y;
 				radius = Random.Float( 8, 11 );
 				break;
+			case BURST:
+				angularSpeed = Random.Float( -30, +30 );
+				speed.polar( Random.Float( PointF.PI2 ), Random.Float( 48, 80 ) );
+				break;
 		}
 
-		left = lifespan = 1f;
+		//burst notes are quick and short-lived, other motions linger for a full second
+		left = lifespan = motion == Motion.BURST ? 0.4f : 1f;
 	}
 
 	@Override

@@ -130,7 +130,8 @@ public class DissonantChordSong extends TargetedSong {
 		ch.damage(modifyDamage(damageRoll(lute)), this);
 		Sample.INSTANCE.play(Assets.Sounds.HIT_MAGIC, 1, Random.Float(0.87f, 1.15f));
 		if (ch.sprite != null) {
-			ch.sprite.burst(0xFFFFFF44, 3);
+			//a burst of notes flies out of the struck target
+			ch.sprite.centerEmitter().burst(new NoteParticle.Factory(noteColor(), NoteParticle.Motion.BURST), 5);
 		}
 	}
 

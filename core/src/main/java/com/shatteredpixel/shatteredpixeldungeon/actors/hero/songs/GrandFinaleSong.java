@@ -42,6 +42,8 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
 
+import java.util.ArrayList;
+
 public class GrandFinaleSong extends Song {
 
 	public static final GrandFinaleSong INSTANCE = new GrandFinaleSong();
@@ -93,7 +95,14 @@ public class GrandFinaleSong extends Song {
 					&& Dungeon.level.distance(hero.pos, ch.pos) <= RANGE) {
 				int debuffs = bardicDebuffs(ch);
 				if (debuffs > 0) {
-					ch.sprite.centerEmitter().start(noteFactory(), 0.2f, 5);
+					//three notes per debuff, in the color of the song that applied it.
+					//buff order isn't tracked, so the colors appear in a random order
+					Integer[] debuffColors = bardicDebuffColors(ch).toArray(new Integer[0]);
+					Random.shuffle(debuffColors);
+					for (int i = 0; i < debuffColors.length; i++) {
+						ch.sprite.centerEmitter().startDelayed(
+								new NoteParticle.Factory(debuffColors[i]), 0.2f, 3, 0.6f * i);
+					}
 					ch.sprite.burst(0xFFFFFF44, 5);
 					ch.damage(modifyDamage(Random.NormalIntRange(min(lvl) * debuffs, max(lvl) * debuffs)), this);
 
@@ -148,21 +157,26 @@ public class GrandFinaleSong extends Song {
 
 	//counts all debuffs on a character which were applied by the bard's songs
 	public static int bardicDebuffs( Char ch ) {
-		int count = 0;
+		return bardicDebuffColors( ch ).size();
+	}
 
-		if (ch.buff(Trance.class) != null)      count++;
-		if (ch.buff(Dancing.class) != null)     count++;
-		if (ch.buff(Marionette.class) != null)  count++;
-		if (ch.buff(Silenced.class) != null)    count++;
-		if (ch.buff(LaidToRest.class) != null)  count++;
+	//the note colors of every bardic debuff on a character, one entry per debuff
+	public static ArrayList<Integer> bardicDebuffColors( Char ch ) {
+		ArrayList<Integer> colors = new ArrayList<>();
+
+		if (ch.buff(Trance.class) != null)      colors.add(TranceSong.INSTANCE.noteColor());
+		if (ch.buff(Dancing.class) != null)     colors.add(DanceSong.INSTANCE.noteColor());
+		if (ch.buff(Marionette.class) != null)  colors.add(MarionetteWaltzSong.INSTANCE.noteColor());
+		if (ch.buff(Silenced.class) != null)    colors.add(NocturneSong.INSTANCE.noteColor());
+		if (ch.buff(LaidToRest.class) != null)  colors.add(RequiemSong.INSTANCE.noteColor());
 
 		//terror and amok are generic buffs, so only count them if a bard tracker is present
 		if (ch.buff(Terror.class) != null
-				&& ch.buff(DirgeSong.BardTerrorTracker.class) != null)      count++;
+				&& ch.buff(DirgeSong.BardTerrorTracker.class) != null)      colors.add(DirgeSong.INSTANCE.noteColor());
 		if (ch.buff(Amok.class) != null
-				&& ch.buff(DiscordSong.BardAmokTracker.class) != null)      count++;
+				&& ch.buff(DiscordSong.BardAmokTracker.class) != null)      colors.add(DiscordSong.INSTANCE.noteColor());
 
-		return count;
+		return colors;
 	}
 
 }

@@ -26,7 +26,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Trance;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 
@@ -53,7 +52,7 @@ public class TranceSong extends TargetedSong {
 
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
-		ch.sprite.centerEmitter().start(noteFactory(), 0.3f, 5);
+		//no notes on the target; the trance debuff has its own continuous note effect
 		Buff.prolong(ch, Trance.class, modifyDuration(duration(lute.buffedLvl())));
 
 		if (maestroFinisher()){
