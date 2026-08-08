@@ -52,7 +52,6 @@ public class TranceSong extends TargetedSong {
 
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {
-		//no notes on the target; the trance debuff has its own continuous note effect
 		Buff.prolong(ch, Trance.class, modifyDuration(duration(lute.buffedLvl())));
 
 		if (maestroFinisher()){
