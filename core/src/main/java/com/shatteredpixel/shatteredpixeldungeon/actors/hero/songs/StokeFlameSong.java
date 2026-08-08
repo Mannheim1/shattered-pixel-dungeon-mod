@@ -174,7 +174,7 @@ public class StokeFlameSong extends Song {
 		public void emit( Emitter emitter, int index, float x, float y ) {
 			FlameParticle p = (FlameParticle)emitter.recycle( FlameParticle.class );
 			p.reset( x, y );
-			p.speed.polar( Random.Float( PointF.PI2 ), (float)Math.sqrt( Random.Float( 32*32, 96*96 ) ) );
+			p.speed.polar( Random.Float( PointF.PI2 ), (float)Math.sqrt( Random.Float( 24*24, 72*72 ) ) );
 		}
 		@Override
 		public boolean lightMode() {
