@@ -166,13 +166,15 @@ public class StokeFlameSong extends Song {
 	}
 
 	//flames that lick outward from the bard in all directions.
-	// safe to redirect recycled flames, as FlameParticle.reset always zeroes speed
+	// safe to redirect recycled flames, as FlameParticle.reset always zeroes speed.
+	//speed is sqrt-distributed, spreading the flames evenly over the area they
+	// cover rather than bunching them up near the bard
 	private static final Emitter.Factory FLARE = new Emitter.Factory() {
 		@Override
 		public void emit( Emitter emitter, int index, float x, float y ) {
 			FlameParticle p = (FlameParticle)emitter.recycle( FlameParticle.class );
 			p.reset( x, y );
-			p.speed.polar( Random.Float( PointF.PI2 ), Random.Float( 32, 96 ) );
+			p.speed.polar( Random.Float( PointF.PI2 ), (float)Math.sqrt( Random.Float( 32*32, 96*96 ) ) );
 		}
 		@Override
 		public boolean lightMode() {

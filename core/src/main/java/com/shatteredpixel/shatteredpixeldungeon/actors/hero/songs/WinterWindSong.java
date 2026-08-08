@@ -193,9 +193,11 @@ public class WinterWindSong extends Song {
 		@Override
 		public void reset( float x, float y ) {
 			super.reset( x, y );
-			//fly outward in a random direction instead of falling in place
+			//fly outward in a random direction instead of falling in place.
+			//speed is sqrt-distributed, spreading the snow evenly over the area
+			// it covers rather than bunching it up near the bard
 			this.y = y;
-			speed.polar( Random.Float( PointF.PI2 ), Random.Float( 24, 72 ) );
+			speed.polar( Random.Float( PointF.PI2 ), (float)Math.sqrt( Random.Float( 24*24, 72*72 ) ) );
 		}
 	}
 
