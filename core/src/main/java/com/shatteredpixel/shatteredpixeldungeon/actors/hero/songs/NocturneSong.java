@@ -21,14 +21,22 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Silenced;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.AlarmTrap;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GuardianTrap;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 
 public class NocturneSong extends TargetedSong {
 
@@ -50,6 +58,20 @@ public class NocturneSong extends TargetedSong {
 
 	//maestro finisher: the target is also briefly blinded
 	public static final float FINISHER_BLIND = 5f;
+
+	//the song harmlessly deactivates alarm and guardian traps it passes over
+	@Override
+	protected void affectPath(Ballistica aim) {
+		for (int cell : aim.subPath(1, aim.dist)) {
+			Trap trap = Dungeon.level.traps.get(cell);
+			if (trap != null && trap.active
+					&& (trap instanceof AlarmTrap || trap instanceof GuardianTrap)) {
+				trap.disarm();
+				CellEmitter.get(cell).start(noteFactory(), 0.3f, 3);
+				GLog.i(Messages.get(this, "trap_disarmed"));
+			}
+		}
+	}
 
 	@Override
 	protected void affectTarget(Lute lute, Hero hero, Char ch) {

@@ -105,6 +105,8 @@ public abstract class TargetedSong extends Song {
 			@Override
 			public void call() {
 
+				affectPath(aim);
+
 				Char ch = Actor.findChar(aim.collisionPos);
 				if (ch != null) {
 					affectTarget(lute, hero, ch);
@@ -124,6 +126,9 @@ public abstract class TargetedSong extends Song {
 		//the missile is made of the song's notes, rather than its usual particles
 		missile.pour(noteFactory(), 0.03f);
 	}
+
+	//hook for songs that affect the cells their stream of notes passes over
+	protected void affectPath(Ballistica aim){}
 
 	//applies the song's effect to a character. Used for the primary target and reverb echoes
 	protected abstract void affectTarget(Lute lute, Hero hero, Char ch);
