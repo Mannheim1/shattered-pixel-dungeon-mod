@@ -66,6 +66,7 @@ public class NocturneSong extends TargetedSong {
 			Trap trap = Dungeon.level.traps.get(cell);
 			if (trap != null && trap.active
 					&& (trap instanceof AlarmTrap || trap instanceof GuardianTrap)) {
+				trap.reveal();
 				trap.disarm();
 				CellEmitter.get(cell).start(noteFactory(), 0.3f, 3);
 				GLog.i(Messages.get(this, "trap_disarmed"));
