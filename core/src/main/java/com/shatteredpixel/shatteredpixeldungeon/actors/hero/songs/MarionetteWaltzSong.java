@@ -32,7 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.watabou.noosa.PseudoPixel;
+import com.watabou.gltextures.TextureCache;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.particles.Emitter;
 
 public class MarionetteWaltzSong extends TargetedSong {
@@ -83,23 +84,29 @@ public class MarionetteWaltzSong extends TargetedSong {
 		}
 	}
 
-	//a single puppet string of light that hangs from above the marionette's head
-	// for as long as the debuff lasts
-	public static class PuppetString extends PseudoPixel {
+	//a single puppet string that hangs from above the marionette's head for as long
+	// as the debuff lasts. It is solid near the head but fades out higher up, as if
+	// extending up out of the map
+	public static class PuppetString extends Image {
 
 		private static final float WIDTH    = 1;
-		private static final float HEIGHT   = 24;
+		private static final float HEIGHT   = 48;
 		//how far the string's lower end reaches down past the top of the target's sprite
 		private static final float OVERLAP  = 2;
 
 		private CharSprite target;
 
 		public PuppetString( CharSprite target ) {
-			super();
+			//a linearly filtered strip: the lower half of the string is solid,
+			// the upper half fades out
+			super( TextureCache.createGradient( 0xFFFFFFFF, 0xFFFFFFFF, 0x00FFFFFF ) );
 			this.target = target;
 			hardlight( INSTANCE.noteColor() );
-			size( WIDTH, HEIGHT );
-			am = 1f;
+
+			//rotate the strip so it runs vertically, solid end at the bottom
+			origin.set( 0 );
+			angle = -90;
+			scale.set( HEIGHT / width, WIDTH );
 		}
 
 		@Override
@@ -107,8 +114,9 @@ public class MarionetteWaltzSong extends TargetedSong {
 			super.update();
 
 			visible = target.visible;
+			//(x, y) anchors the bottom of the string
 			x = target.center().x - WIDTH / 2f;
-			y = target.y + OVERLAP - HEIGHT;
+			y = target.y + OVERLAP;
 		}
 	}
 
