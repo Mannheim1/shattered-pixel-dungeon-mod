@@ -22,11 +22,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DanceSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
-import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
@@ -92,21 +91,14 @@ public class Dancing extends FlavourBuff {
 		return Math.max(0, (DURATION - visualcooldown()) / DURATION);
 	}
 
-	private Emitter noteEmitter;
-
 	@Override
 	public void fx(boolean on) {
 		if (target.sprite != null) {
 			if (on) {
 				target.sprite.dance();
-				//notes continuously float off the dancer while the compulsion lasts
-				noteEmitter = target.sprite.centerEmitter();
-				noteEmitter.pour(DanceSong.INSTANCE.noteFactory(), 0.9f);
+				target.sprite.add(CharSprite.State.DANCING);
 			} else {
-				if (noteEmitter != null) {
-					noteEmitter.on = false;
-					noteEmitter = null;
-				}
+				target.sprite.remove(CharSprite.State.DANCING);
 				if (target.paralysed == 0) {
 					target.sprite.idle();
 				}

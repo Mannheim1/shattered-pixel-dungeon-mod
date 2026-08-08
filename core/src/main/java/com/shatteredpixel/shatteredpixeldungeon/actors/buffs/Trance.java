@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
 //applied by the bard's trance song. -20% accuracy and evasion, -50% movement speed
@@ -42,6 +43,12 @@ public class Trance extends FlavourBuff {
 	@Override
 	public float iconFadePercent() {
 		return Math.max(0, (DURATION - visualcooldown()) / DURATION);
+	}
+
+	@Override
+	public void fx(boolean on) {
+		if (on) target.sprite.add(CharSprite.State.TRANCED);
+		else target.sprite.remove(CharSprite.State.TRANCED);
 	}
 
 	@Override

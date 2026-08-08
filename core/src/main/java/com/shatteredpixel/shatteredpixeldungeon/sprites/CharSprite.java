@@ -34,7 +34,10 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.ShieldHalo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TorchHalo;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.DanceSong;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.TranceSong;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -84,7 +87,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected float shadowOffset    = 0.25f;
 
 	public enum State {
-		BURNING, LEVITATING, INVISIBLE, PARALYSED, FROZEN, ILLUMINATED, CHILLED, DARKENED, MARKED, HEALING, SHIELDED, HEARTS, GLOWING, AURA
+		BURNING, LEVITATING, INVISIBLE, PARALYSED, FROZEN, ILLUMINATED, CHILLED, DARKENED, MARKED, HEALING, SHIELDED, HEARTS, GLOWING, AURA, DANCING, TRANCED
 	}
 	
 	protected Animation idle;
@@ -104,6 +107,8 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected Emitter levitation;
 	protected Emitter healing;
 	protected Emitter hearts;
+	protected Emitter dancing;
+	protected Emitter tranced;
 	
 	protected IceBlock iceBlock;
 	protected DarkBlock darkBlock;
@@ -454,6 +459,16 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				if (glowBlock != null) glowBlock.killAndErase();
 				glowBlock = GlowBlock.lighten(this);
 				break;
+			case DANCING:
+				if (dancing != null) dancing.on = false;
+				dancing = centerEmitter();
+				dancing.pour(new NoteParticle.Factory(DanceSong.INSTANCE.noteColor(), NoteParticle.Motion.SWING), 0.4f);
+				break;
+			case TRANCED:
+				if (tranced != null) tranced.on = false;
+				tranced = centerEmitter();
+				tranced.pour(new NoteParticle.Factory(TranceSong.INSTANCE.noteColor(), NoteParticle.Motion.ORBIT), 0.33f);
+				break;
 			case AURA:
 				if (aura != null)   aura.killAndErase();
 				float size = Math.max(width(), height());
@@ -565,6 +580,18 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 					glowBlock = null;
 				}
 				break;
+			case DANCING:
+				if (dancing != null) {
+					dancing.on = false;
+					dancing = null;
+				}
+				break;
+			case TRANCED:
+				if (tranced != null) {
+					tranced.on = false;
+					tranced = null;
+				}
+				break;
 			case AURA:
 				if (aura != null){
 					aura.killAndErase();
@@ -624,6 +651,14 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		}
 		if (hearts != null) {
 			hearts.visible = visible;
+		}
+		if (dancing != null) {
+			dancing.visible = visible;
+			dancing.pos(center());
+		}
+		if (tranced != null) {
+			tranced.visible = visible;
+			tranced.pos(center());
 		}
 		//shield fx updates its own visibility
 		if (aura != null) {
