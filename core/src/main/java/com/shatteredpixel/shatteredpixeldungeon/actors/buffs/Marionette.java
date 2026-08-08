@@ -25,7 +25,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.songs.MarionetteWaltzSong;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -95,7 +94,6 @@ public class Marionette extends Buff {
 			if (marionette != null && marionette.mirrorAttacks
 					&& ch != enemy && ch.isAlive()
 					&& ch instanceof Mob && ((Mob) ch).canAttack(enemy)) {
-				ch.sprite.emitter().start(MarionetteWaltzSong.StringParticle.FACTORY, 0.2f, 2);
 				ch.attack(enemy);
 				if (!enemy.isAlive()) {
 					return;

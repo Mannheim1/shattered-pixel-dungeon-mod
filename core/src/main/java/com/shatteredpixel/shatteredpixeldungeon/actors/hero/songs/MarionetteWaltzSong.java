@@ -28,13 +28,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dancing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Marionette;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.gltextures.TextureCache;
 import com.watabou.noosa.Image;
-import com.watabou.noosa.particles.Emitter;
 
 public class MarionetteWaltzSong extends TargetedSong {
 
@@ -117,27 +115,6 @@ public class MarionetteWaltzSong extends TargetedSong {
 			//(x, y) anchors the bottom of the string
 			x = target.center().x - WIDTH / 2f;
 			y = target.y + OVERLAP;
-		}
-	}
-
-	//puppet strings: thin shafts that rise from the target and fade away
-	public static class StringParticle extends ShaftParticle {
-
-		public static final Emitter.Factory FACTORY = new Emitter.Factory() {
-			@Override
-			public void emit( Emitter emitter, int index, float x, float y ) {
-				((StringParticle)emitter.recycle( StringParticle.class )).reset( x, y );
-			}
-			@Override
-			public boolean lightMode() {
-				return true;
-			}
-		};
-
-		@Override
-		public void reset( float x, float y ) {
-			super.reset( x, y );
-			hardlight( INSTANCE.noteColor() );
 		}
 	}
 
