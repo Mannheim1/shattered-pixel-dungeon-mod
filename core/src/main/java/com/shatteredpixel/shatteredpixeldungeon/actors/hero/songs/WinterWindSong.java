@@ -46,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.NoteParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Lute;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -146,7 +147,10 @@ public class WinterWindSong extends Song {
 			}
 
 			if (Dungeon.level.heroFOV[cell]) {
-				CellEmitter.get(cell).burst(SnowParticle.FACTORY, 2);
+				//the snow on each cell settles just as the gust's wavefront passes over it
+				float delay = Dungeon.level.trueDistance(hero.pos, cell)
+						* DungeonTilemap.SIZE / GustParticle.MAX_SPEED;
+				CellEmitter.get(cell).startDelayed(SnowParticle.FACTORY, 0.05f, 2, delay);
 			}
 
 			//chill and douse characters caught in the gust. The bard is doused but not chilled
@@ -183,6 +187,9 @@ public class WinterWindSong extends Song {
 	//snow that gusts outward from the bard, rather than drifting downward in place
 	public static class GustParticle extends SnowParticle {
 
+		public static final float MIN_SPEED = 24;
+		public static final float MAX_SPEED = 72;
+
 		public static final Emitter.Factory FACTORY = new Emitter.Factory() {
 			@Override
 			public void emit( Emitter emitter, int index, float x, float y ) {
@@ -197,7 +204,8 @@ public class WinterWindSong extends Song {
 			//speed is sqrt-distributed, spreading the snow evenly over the area
 			// it covers rather than bunching it up near the bard
 			this.y = y;
-			speed.polar( Random.Float( PointF.PI2 ), (float)Math.sqrt( Random.Float( 24*24, 72*72 ) ) );
+			speed.polar( Random.Float( PointF.PI2 ),
+					(float)Math.sqrt( Random.Float( MIN_SPEED*MIN_SPEED, MAX_SPEED*MAX_SPEED ) ) );
 		}
 	}
 
